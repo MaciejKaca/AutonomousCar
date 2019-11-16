@@ -16,9 +16,8 @@ void loop()
 {
    if(isMessagePresent())
    {
-      receiveMessage(message)
-      {
-         handleMessage(message);
-      }
+      receiveMessage(message);
    }
+
+   handleMessage(message, stepperMotor);
 }
