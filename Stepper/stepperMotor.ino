@@ -1,15 +1,13 @@
-#include <AccelStepper.h>
-
-#include "../Interface/stepperInterface.h"
-#include "stepper.h"
+#include <stepperMotor.h>
+#include <stepperInterface.h>
 
 AccelStepper stepperMotor = AccelStepper(MOTOR_INTERFACE_TYPE, STEPPER_PIN, DIRECTION_PIN);
 StepperMotorMsg message;
 
 void setup()
 {
-   stepper.setMaxSpeed(MAX_MOTOR_SPEED);
-   stepper.setSpeed(INITIAL_SPEED);	
+   stepperMotor.setMaxSpeed(MAX_MOTOR_SPEED);
+   stepperMotor.setSpeed(INITIAL_SPEED);	
 }
 
 void loop()

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <Wire.h>
+#include <Arduino.h>
 #include <AccelStepper.h>
+#include <stepperInterface.h>
 
 const byte DIRECTION_PIN = 7;
 const byte STEPPER_PIN = 8;
@@ -50,15 +51,6 @@ void handleMessage(StepperMotorMsg message, AccelStepper &stepperMotor)
         //TODO
         break;
         
-    }
-    else
-    {
-        if(message.command == SWICTH_OFF)
-        {
-            digitalWrite(STEPPER_DRIVER_POWER, LOW);
-        }
-
-        stepperMotor.setSpeed(0);
     }
 }
 
