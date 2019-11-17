@@ -56,5 +56,5 @@ void handleMessage(StepperMotorMsg message, AccelStepper &stepperMotor)
 
 void receiveMessage(StepperMotorMsg &message)
 {
-     Serial.readBytes((char*)message, sizeof(StepperMotorMsg));
+     Serial.readBytes((char*)&message, sizeof(StepperMotorMsg));
 }
