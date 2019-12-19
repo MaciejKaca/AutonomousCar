@@ -12,3 +12,8 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
+
+void MainWindow::setText(const QString text)
+{
+    ui->label->setText(text);
+}

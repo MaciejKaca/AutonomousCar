@@ -25,10 +25,16 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    joystick/joystick.cc \
+    gamepad.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    gamepad.h \
+    common.h
 
 FORMS += \
         mainwindow.ui
+
+INCLUDEPATH += /home/ekacmac/Desktop/AutonomousCar/joystick/**
