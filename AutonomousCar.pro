@@ -27,12 +27,16 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     joystick/joystick.cc \
-    gamepad.cpp
+    gamepad.cpp \
+    steppermotor.cpp \
 
 HEADERS += \
         mainwindow.h \
     gamepad.h \
-    common.h
+    common.h \
+    steppermotor.h
 
 FORMS += \
         mainwindow.ui
+
+LIBS += -Wall -pthread -lpigpio -lrt
