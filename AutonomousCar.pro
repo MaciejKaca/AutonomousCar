@@ -36,5 +36,3 @@ HEADERS += \
 
 FORMS += \
         mainwindow.ui
-
-INCLUDEPATH += /home/ekacmac/Desktop/AutonomousCar/joystick/**

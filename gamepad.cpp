@@ -1,16 +1,18 @@
 #include "gamepad.h"
 #include "common.h"
 
-#include<QDebug>
+#include <QDebug>
 #include <thread>
 #include <chrono>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 Gamepad::Gamepad()
-{
+{    
     if (!joystick.isFound())
     {
         qCritical( "Gamepad not found");
+        exit(EXIT_BY_MISSING_GAMEPAD);
     }
 }
 
@@ -29,12 +31,24 @@ void Gamepad::clearInput()
     }
 }
 
+inline bool Gamepad::isGamepadConnected()
+{
+    struct stat buffer;
+    return (stat (gamepadPath.c_str(), &buffer) == 0);
+}
+
 void Gamepad::handleInput()
 {
     clearInput();
 
     while(true)
     {
+        if (!isGamepadConnected())
+        {
+            qCritical( "Gamepad disconnected");
+            exit(EXIT_BY_MISSING_GAMEPAD);
+        }
+
         JoystickEvent event;
 
         std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_REFRESH_TIME));
