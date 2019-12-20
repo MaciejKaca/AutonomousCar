@@ -2,6 +2,7 @@
 #define BUTTONS_H
 
 #include <cstdint>
+#include <math.h>
 
 const uint8_t GAMEPAD_REFRESH_TIME = 1; //Time in microseconds
 
@@ -14,8 +15,11 @@ const bool BUTTON_UP = false;
 
 const uint8_t NUMBER_OF_BUTTONS = 10;
 const uint8_t NUMBER_OF_AXIS = 7;
+const int16_t MAX_AXIS_VALUE = 32767;
+const int16_t MIN_AXIS_VALUE = -32767;
 
 const uint8_t XBOX_BUTTON = 8;
+const uint8_t RIGHT_TRIGGER = 5;
 
 enum StepperMotorCommand
 {
@@ -37,5 +41,7 @@ const uint16_t MIN_SPEED = 300;
 const uint8_t STEPPER_ENABLE_PIN = 16;
 const uint8_t STEPPER_STEP_PIN = 21;
 const uint8_t STEPPER_DIRECTION_PIN = 20;
+
+static const float AXIS_TO_SPEED_SCALE =  float( abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(MAX_SPEED - MIN_SPEED);
 
 #endif // BUTTONS_H

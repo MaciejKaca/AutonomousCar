@@ -23,6 +23,8 @@ StepperMotor::StepperMotor()
     gpioWrite(STEPPER_DIRECTION_PIN, false);
     gpioWrite(STEPPER_ENABLE_PIN, false);
     gpioWrite(STEPPER_STEP_PIN, false);
+
+    threadActive = false;
 }
 
 void StepperMotor::validateSpeed(uint16_t &speed)
@@ -56,31 +58,38 @@ bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
     gpioWrite(STEPPER_STEP_PIN, true);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
 
+    return true;
 }
 
 void StepperMotor::brake()
 {
-    terminateThread = true;
+    threadActive = false;
     gpioWrite(STEPPER_ENABLE_PIN, true);
 }
 
 void StepperMotor::swithOff()
 {
-    terminateThread = true;
+    threadActive = false;
     gpioWrite(STEPPER_ENABLE_PIN, false);
 }
 
 void StepperMotor::constantMovement()
 {
-    terminateThread = false;
+    threadActive = true;
 
-    while(terminateThread == false)
+    while(threadActive == true)
     {
         makeStep(direction, speed);
     }
 }
 
-void StepperMotor::move(StepperMotorDirection direction, uint16_t speed)
+void StepperMotor::move(StepperMotorDirection _direction, uint16_t _speed)
 {
-    auto gamepadThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
+    direction = _direction;
+    speed = _speed;
+
+    if(threadActive == false)
+    {
+        auto gamepadThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
+    }
 }

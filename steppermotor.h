@@ -2,6 +2,7 @@
 #define STEPPERMOTOR_H
 
 #include "common.h"
+#include "steppermotor.h"
 
 class StepperMotor
 {
@@ -15,7 +16,7 @@ class StepperMotor
         uint16_t speed;
         uint16_t delay;
         StepperMotorDirection direction;
-        bool terminateThread;
+        bool threadActive;
         void constantMovement();
         void validateSpeed(uint16_t & speed);
 };

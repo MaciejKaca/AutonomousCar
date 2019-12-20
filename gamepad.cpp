@@ -6,6 +6,9 @@
 #include <chrono>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
+
+#include "steppermotor.h"
 
 Gamepad::Gamepad()
 {    
@@ -35,6 +38,22 @@ inline bool Gamepad::isGamepadConnected()
 {
     struct stat buffer;
     return (stat (gamepadPath.c_str(), &buffer) == 0);
+}
+
+uint16_t Gamepad::axisToSpeed(int16_t axisValue)
+{
+    if(axisValue > MIN_AXIS_VALUE && axisValue < 0)
+    {
+        return MIN_SPEED + ( ceil( float( MAX_AXIS_VALUE - abs(axisValue) ) / AXIS_TO_SPEED_SCALE ) );
+    }
+    else if(axisValue >= 0)
+    {
+        return MIN_SPEED + ( ceil( float( MAX_AXIS_VALUE + axisValue) / AXIS_TO_SPEED_SCALE ) );
+    }
+    else
+    {
+        return 0;
+    }
 }
 
 void Gamepad::handleInput()
@@ -76,6 +95,17 @@ void Gamepad::handleInput()
             {
                 switch (event.number)
                 {
+                    case RIGHT_TRIGGER:
+                        if(event.value != MIN_AXIS_VALUE)
+                        {
+                            stepperMotor.move( FORWARD, axisToSpeed( event.value ) );
+                        }
+                        else
+                        {
+                            stepperMotor.swithOff();
+                        }
+                        break;
+
                     default:
                         qInfo() << "Uknown axis :" << event.number << "value : " << event.value;
                         break;
