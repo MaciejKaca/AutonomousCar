@@ -1,7 +1,7 @@
 #include "steppermotor.h"
 #include "common.h"
 
-#include <pigpio.h>
+#include <wiringPi.h>
 #include <unistd.h>
 #include <chrono>
 #include <thread>
@@ -10,19 +10,19 @@
 
 StepperMotor::StepperMotor()
 {
-    if(gpioInitialise() < 0)
+    if(wiringPiSetup() < 0)
     {
         qCritical( "GPIO Failed");
         exit(EXIT_BY_FAILED_GPIO);
     }
 
-    gpioSetMode(STEPPER_DIRECTION_PIN, PI_OUTPUT);
-    gpioSetMode(STEPPER_ENABLE_PIN, PI_OUTPUT);
-    gpioSetMode(STEPPER_STEP_PIN, PI_OUTPUT);
+    pinMode(STEPPER_DIRECTION_PIN, OUTPUT);
+    pinMode(STEPPER_ENABLE_PIN, OUTPUT);
+    pinMode(STEPPER_STEP_PIN, OUTPUT);
 
-    gpioWrite(STEPPER_DIRECTION_PIN, false);
-    gpioWrite(STEPPER_ENABLE_PIN, false);
-    gpioWrite(STEPPER_STEP_PIN, false);
+    digitalWrite(STEPPER_DIRECTION_PIN, LOW);
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
+    digitalWrite(STEPPER_STEP_PIN, LOW);
 
     threadActive = false;
 }
@@ -44,18 +44,18 @@ bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
 
     if(direction == FORWARD)
     {
-        gpioWrite(STEPPER_DIRECTION_PIN, false);
+        digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
     else if(direction == BACKWARD)
     {
-        gpioWrite(STEPPER_DIRECTION_PIN, true);
+        digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
     }
 
-    gpioWrite(STEPPER_ENABLE_PIN, true);
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 
-    gpioWrite(STEPPER_STEP_PIN, false);
+    digitalWrite(STEPPER_STEP_PIN, HIGH);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
-    gpioWrite(STEPPER_STEP_PIN, true);
+    digitalWrite(STEPPER_STEP_PIN, LOW);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
 
     return true;
@@ -64,13 +64,13 @@ bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
 void StepperMotor::brake()
 {
     threadActive = false;
-    gpioWrite(STEPPER_ENABLE_PIN, true);
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
 void StepperMotor::swithOff()
 {
     threadActive = false;
-    gpioWrite(STEPPER_ENABLE_PIN, false);
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
 void StepperMotor::constantMovement()

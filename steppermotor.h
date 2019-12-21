@@ -11,13 +11,14 @@ class StepperMotor
         void move(StepperMotorDirection direction, uint16_t speed);
         void brake();
         void swithOff();
-    private:
+        void constantMovement();
+        bool threadActive;
         bool makeStep(StepperMotorDirection direction, uint16_t speed);
+
+    private:
         uint16_t speed;
         uint16_t delay;
         StepperMotorDirection direction;
-        bool threadActive;
-        void constantMovement();
         void validateSpeed(uint16_t & speed);
 };
 

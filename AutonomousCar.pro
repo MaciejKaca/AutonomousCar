@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2019-12-19T14:10:51
+# Project created by QtCreator 2019-12-21T22:15:17
 #
 #-------------------------------------------------
 
@@ -26,17 +26,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    joystick/joystick.cc \
-    gamepad.cpp \
-    steppermotor.cpp \
+        joystick/joystick.cc \
+        gamepad.cpp \
+        steppermotor.cpp \
 
 HEADERS += \
         mainwindow.h \
-    gamepad.h \
-    common.h \
-    steppermotor.h
+        gamepad.h \
+        common.h \
+        steppermotor.h
 
 FORMS += \
         mainwindow.ui
 
-LIBS += -Wall -pthread -lpigpio -lrt
+target.path = /home/pi
+INSTALLS += target
+
+LIBS += -lwiringPi
