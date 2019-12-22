@@ -21,6 +21,9 @@ private:
     uint16_t axisToSpeed(int16_t axisValue);
     const std::string gamepadPath = "/dev/input/js0";
     StepperMotor stepperMotor;
+    bool isBrakePressed;
+    bool isLeftTriggerPressed;
+    bool isRightTriggerPressed;
 };
 
 #endif // GAMEPAD_H

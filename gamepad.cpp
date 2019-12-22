@@ -17,6 +17,10 @@ Gamepad::Gamepad()
         qCritical( "Gamepad not found");
         exit(EXIT_BY_MISSING_GAMEPAD);
     }
+
+    isBrakePressed = false;
+    isLeftTriggerPressed = false;
+    isRightTriggerPressed = false;
 }
 
 void Gamepad::clearInput()
@@ -78,13 +82,27 @@ void Gamepad::handleInput()
             {
                 switch (event.number)
                 {
-                    case XBOX_BUTTON:
+                    case EXIT_BUTTON:
                         if(event.value == BUTTON_DOWN)
                         {
-                            qInfo("XBOX_BUTTON Pressed");
+                            qInfo("Exit Pressed");
                             exit(EXIT_BY_BUTTON);
                         }
                         break;
+
+                    case X_BUTTON:
+                        if(event.value == BUTTON_DOWN)
+                        {
+                            stepperMotor.brake();
+                            isBrakePressed = true;
+                        }
+                        else
+                        {
+                            stepperMotor.swithOff();
+                            isBrakePressed = false;
+                        }
+
+                    break;
 
                     default:
                         qInfo() << "Uknown button :" << event.number << "value : " << event.value;
@@ -96,15 +114,36 @@ void Gamepad::handleInput()
                 switch (event.number)
                 {
                     case RIGHT_TRIGGER:
-                        if(event.value != MIN_AXIS_VALUE)
+                        if(isBrakePressed == false)
                         {
-                            stepperMotor.move( FORWARD, axisToSpeed( event.value ) );
+                            if(event.value != MIN_AXIS_VALUE && isLeftTriggerPressed == false)
+                            {
+                                stepperMotor.move( FORWARD, axisToSpeed( event.value ) );
+                                isRightTriggerPressed = true;
+                            }
+                            else
+                            {
+                                stepperMotor.swithOff();
+                                isRightTriggerPressed = false;
+                            }
+                        }
+                        break;
+
+                case LEFT_TRIGGER:
+                    if(isBrakePressed == false)
+                    {
+                        if(event.value != MIN_AXIS_VALUE && isRightTriggerPressed == false)
+                        {
+                            stepperMotor.move( BACKWARD, axisToSpeed( event.value ) );
+                            isLeftTriggerPressed = true;
                         }
                         else
                         {
                             stepperMotor.swithOff();
+                            isLeftTriggerPressed = false;
                         }
-                        break;
+                    }
+                    break;
 
                     default:
                         qInfo() << "Uknown axis :" << event.number << "value : " << event.value;

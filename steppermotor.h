@@ -4,6 +4,8 @@
 #include "common.h"
 #include "steppermotor.h"
 
+#include <thread>
+
 class StepperMotor
 {
     public:
@@ -11,8 +13,6 @@ class StepperMotor
         void move(StepperMotorDirection direction, uint16_t speed);
         void brake();
         void swithOff();
-        void constantMovement();
-        bool threadActive;
         bool makeStep(StepperMotorDirection direction, uint16_t speed);
 
     private:
@@ -20,6 +20,10 @@ class StepperMotor
         uint16_t delay;
         StepperMotorDirection direction;
         void validateSpeed(uint16_t & speed);
+        std::thread stepperThread;
+        void checkAndStopThread();
+        void constantMovement();
+        bool threadActive;
 };
 
 #endif // STEPPERMOTOR_H

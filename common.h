@@ -18,8 +18,10 @@ const uint8_t NUMBER_OF_AXIS = 7;
 const int16_t MAX_AXIS_VALUE = 32767;
 const int16_t MIN_AXIS_VALUE = -32767;
 
-const uint8_t XBOX_BUTTON = 1;
+const uint8_t EXIT_BUTTON = 11;
 const uint8_t RIGHT_TRIGGER = 4;
+const uint8_t LEFT_TRIGGER = 5;
+const uint8_t X_BUTTON = 3;
 
 enum StepperMotorCommand
 {
@@ -35,8 +37,8 @@ enum StepperMotorDirection
     BACKWARD = 1
 };
 
-const uint16_t MAX_SPEED = 1000;
-const uint16_t MIN_SPEED = 300;
+const uint16_t MAX_SPEED = 2000;
+const uint16_t MIN_SPEED = 250;
 
 const uint8_t STEPPER_ENABLE_PIN = 27;
 const uint8_t STEPPER_STEP_PIN = 29;

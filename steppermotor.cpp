@@ -44,11 +44,11 @@ bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
 
     if(direction == FORWARD)
     {
-        digitalWrite(STEPPER_DIRECTION_PIN, LOW);
+        digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
     }
     else if(direction == BACKWARD)
     {
-        digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
+        digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
 
     digitalWrite(STEPPER_ENABLE_PIN, HIGH);
@@ -63,13 +63,13 @@ bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
 
 void StepperMotor::brake()
 {
-    threadActive = false;
+    checkAndStopThread();
     digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
 void StepperMotor::swithOff()
 {
-    threadActive = false;
+    checkAndStopThread();
     digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
@@ -83,6 +83,15 @@ void StepperMotor::constantMovement()
     }
 }
 
+void StepperMotor::checkAndStopThread()
+{
+    if(threadActive == true)
+    {
+        threadActive = false;
+        stepperThread.join();
+    }
+}
+
 void StepperMotor::move(StepperMotorDirection _direction, uint16_t _speed)
 {
     direction = _direction;
@@ -90,6 +99,6 @@ void StepperMotor::move(StepperMotorDirection _direction, uint16_t _speed)
 
     if(threadActive == false)
     {
-        auto gamepadThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
+        stepperThread = std::thread(&StepperMotor::constantMovement, this);
     }
 }
