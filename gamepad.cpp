@@ -9,8 +9,9 @@
 #include <unistd.h>
 
 #include "steppermotor.h"
+#include "RS-232/rs232.h"
 
-Gamepad::Gamepad()
+Gamepad::Gamepad(StepperMotor * _stepperMotor, SerialPort * _lightsAndServoSerial) : lightsAndServoSerial(_lightsAndServoSerial)
 {    
     if (!joystick.isFound())
     {
@@ -21,6 +22,8 @@ Gamepad::Gamepad()
     isBrakePressed = false;
     isLeftTriggerPressed = false;
     isRightTriggerPressed = false;
+
+    stepperMotor = _stepperMotor;
 }
 
 void Gamepad::clearInput()
@@ -60,6 +63,11 @@ uint16_t Gamepad::axisToSpeed(int16_t axisValue)
     }
 }
 
+int8_t Gamepad::axisToDegrees(int16_t axisValue)
+{
+    return  int8_t( axisValue / AXIS_TO_DEEGRES_SCALE );
+}
+
 void Gamepad::handleInput()
 {
     clearInput();
@@ -93,16 +101,35 @@ void Gamepad::handleInput()
                     case X_BUTTON:
                         if(event.value == BUTTON_DOWN)
                         {
-                            stepperMotor.brake();
+                            stepperMotor->brake();
                             isBrakePressed = true;
                         }
                         else
                         {
-                            stepperMotor.swithOff();
+                            stepperMotor->swithOff();
                             isBrakePressed = false;
                         }
+                        break;
 
-                    break;
+                    case RIGHT_BUMPER:
+                        if(event.value == BUTTON_DOWN)
+                        {
+                            LightsAndServoMsg message;
+                            message.device = TURN_SIGNAL;
+                            message.turnSignalCommand = RIGHT;
+                            lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
+                        }
+                        break;
+
+                    case LEFT_BUMPER:
+                        if(event.value == BUTTON_DOWN)
+                        {
+                            LightsAndServoMsg message;
+                            message.device = TURN_SIGNAL;
+                            message.turnSignalCommand = LEFT;
+                            lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
+                        }
+                        break;
 
                     default:
                         qInfo() << "Uknown button :" << event.number << "value : " << event.value;
@@ -116,14 +143,14 @@ void Gamepad::handleInput()
                     case RIGHT_TRIGGER:
                         if(isBrakePressed == false)
                         {
-                            if(event.value != MIN_AXIS_VALUE && isLeftTriggerPressed == false)
+                            if(event.value != MIN_AXIS_VALUE &&  event.value >= MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE && isLeftTriggerPressed == false)
                             {
-                                stepperMotor.move( FORWARD, axisToSpeed( event.value ) );
+                                stepperMotor->move( FORWARD, axisToSpeed( event.value ) );
                                 isRightTriggerPressed = true;
                             }
                             else
                             {
-                                stepperMotor.swithOff();
+                                stepperMotor->swithOff();
                                 isRightTriggerPressed = false;
                             }
                         }
@@ -132,17 +159,25 @@ void Gamepad::handleInput()
                 case LEFT_TRIGGER:
                     if(isBrakePressed == false)
                     {
-                        if(event.value != MIN_AXIS_VALUE && isRightTriggerPressed == false)
+                        if(event.value != MIN_AXIS_VALUE &&  event.value >= MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE && isRightTriggerPressed == false)
                         {
-                            stepperMotor.move( BACKWARD, axisToSpeed( event.value ) );
+                            stepperMotor->move( BACKWARD, axisToSpeed( event.value ) );
                             isLeftTriggerPressed = true;
                         }
                         else
                         {
-                            stepperMotor.swithOff();
+                            stepperMotor->swithOff();
                             isLeftTriggerPressed = false;
                         }
                     }
+                    break;
+
+                case LEFT_X_AXIS:
+                    LightsAndServoMsg message;
+                    message.device = SERVO;
+                    message.servoInfo.command = TURN;
+                    message.servoInfo.degrees = axisToDegrees(event.value);
+                    lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
                     break;
 
                     default:

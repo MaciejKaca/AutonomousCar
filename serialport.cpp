@@ -1,0 +1,39 @@
+#include "serialport.h"
+#include "common.h"
+
+#include "RS-232/rs232.h"
+
+#include <QDebug>
+
+SerialPort::SerialPort(const char * device) : CPORT_NR( RS232_GetPortnr(device) )
+{
+    open_comport();
+}
+
+void SerialPort::open_comport()
+{
+    const char mode[]={'8','N','1',0};
+
+    if(RS232_OpenComport(CPORT_NR, BAUD_RATE, mode))
+    {
+        qCritical( "Arduino not found");
+        exit(EXIT_BY_MISSING_MODULE);
+    }
+}
+
+bool SerialPort::send(unsigned char *buffer, int size)
+{
+    if( RS232_SendBuf(CPORT_NR, buffer, size) > 0)
+    {
+        return 1; //Succes
+    }
+    else
+    {
+        return 0; //Sending failed
+    }
+}
+
+void SerialPort::read(unsigned char *buffer, int size)
+{
+    RS232_PollComport(CPORT_NR, buffer, size);
+}

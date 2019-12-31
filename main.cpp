@@ -1,8 +1,12 @@
 #include "gamepad.h"
+#include "serialport.h"
 
 #include <future>
 
-Gamepad gamepad;
+SerialPort lightsAndServoSerial(LIGHTS_AND_SERVO_PORT);
+StepperMotor stepperMotor;
+Gamepad gamepad(&stepperMotor, &lightsAndServoSerial);
+
 
 int main()
 {

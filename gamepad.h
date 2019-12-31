@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "steppermotor.h"
+#include "serialport.h"
 
 #include <joystick/joystick.hh>
 #include <unistd.h>
@@ -11,7 +12,7 @@
 class Gamepad
 {
 public:
-    Gamepad();
+    Gamepad(StepperMotor *  _stepperMotor, SerialPort * _lightsAndServoSerial);
     void handleInput();
 
 private:
@@ -20,10 +21,13 @@ private:
     bool isGamepadConnected();
     uint16_t axisToSpeed(int16_t axisValue);
     const std::string gamepadPath = "/dev/input/js0";
-    StepperMotor stepperMotor;
+    StepperMotor * stepperMotor;
     bool isBrakePressed;
     bool isLeftTriggerPressed;
     bool isRightTriggerPressed;
+    SerialPort * lightsAndServoSerial;
+    int8_t axisToDegrees(int16_t axisValue);
+    std::map<ButtonID, bool> buttonState;
 };
 
 #endif // GAMEPAD_H

@@ -29,12 +29,16 @@ SOURCES += \
         joystick/joystick.cc \
         gamepad.cpp \
         steppermotor.cpp \
+    serialport.cpp \
+    RS-232/rs232.c
 
 HEADERS += \
         mainwindow.h \
         gamepad.h \
         common.h \
-        steppermotor.h
+        steppermotor.h \
+    serialport.h \
+    CarInterface/interface.h
 
 FORMS += \
         mainwindow.ui
@@ -42,4 +46,9 @@ FORMS += \
 target.path = /home/pi
 INSTALLS += target
 
-LIBS += -lwiringPi
+LIBS += \
+              -lwiringPi \
+
+INCLUDEPATH += \
+                              /usr/include/c++/7.4.0 \
+                              ///usr/include \
