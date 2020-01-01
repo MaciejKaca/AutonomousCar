@@ -6,7 +6,7 @@
 
 #include "CarInterface/interface.h"
 
-const uint8_t GAMEPAD_REFRESH_TIME = 1; //Time in microseconds
+const uint8_t GAMEPAD_REFRESH_TIME = 1; //Time in milliseconds
 
 const uint8_t EXIT_BY_BUTTON = 1;
 const uint8_t EXIT_BY_MISSING_GAMEPAD = 2;
@@ -24,12 +24,16 @@ const int16_t MIN_AXIS_VALUE = -32767;
 enum ButtonID
 {
     EXIT_BUTTON = 11,
-    RIGHT_TRIGGER = 4,
-    LEFT_TRIGGER = 5,
     X_BUTTON = 3,
     RIGHT_BUMPER = 7,
     LEFT_BUMPER = 6,
-    LEFT_X_AXIS = 0
+};
+
+enum AxisID
+{
+    LEFT_X_AXIS = 0,
+    RIGHT_TRIGGER = 4,
+    LEFT_TRIGGER = 5
 };
 
 const char  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";

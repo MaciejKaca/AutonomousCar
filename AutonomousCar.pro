@@ -48,7 +48,3 @@ INSTALLS += target
 
 LIBS += \
               -lwiringPi \
-
-INCLUDEPATH += \
-                              /usr/include/c++/7.4.0 \
-                              ///usr/include \

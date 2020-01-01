@@ -10,5 +10,5 @@ Gamepad gamepad(&stepperMotor, &lightsAndServoSerial);
 
 int main()
 {
-    auto gamepadThread = std::async(std::launch::async, &Gamepad::handleInput, &gamepad);
+    auto gamepadThread = std::async(std::launch::async, &Gamepad::readGamepadInput, &gamepad);
 }

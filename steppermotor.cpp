@@ -97,8 +97,15 @@ void StepperMotor::move(StepperMotorDirection _direction, uint16_t _speed)
     direction = _direction;
     speed = _speed;
 
-    if(threadActive == false)
+    if( speed > MIN_SPEED)
     {
-        stepperThread = std::thread(&StepperMotor::constantMovement, this);
+        if(threadActive == false)
+        {
+            stepperThread = std::thread(&StepperMotor::constantMovement, this);
+        }
+    }
+    else
+    {
+        swithOff();
     }
 }

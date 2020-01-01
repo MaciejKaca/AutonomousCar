@@ -49,7 +49,7 @@ inline bool Gamepad::isGamepadConnected()
 
 uint16_t Gamepad::axisToSpeed(int16_t axisValue)
 {
-    if(axisValue > MIN_AXIS_VALUE && axisValue < 0)
+    if(axisValue > ( MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE ) && axisValue < 0)
     {
         return MIN_SPEED + ( ceil( float( MAX_AXIS_VALUE - abs(axisValue) ) / AXIS_TO_SPEED_SCALE ) );
     }
@@ -68,7 +68,7 @@ int8_t Gamepad::axisToDegrees(int16_t axisValue)
     return  int8_t( axisValue / AXIS_TO_DEEGRES_SCALE );
 }
 
-void Gamepad::handleInput()
+void Gamepad::readGamepadInput()
 {
     clearInput();
 
@@ -88,105 +88,115 @@ void Gamepad::handleInput()
         {
             if(event.isButton())
             {
-                switch (event.number)
-                {
-                    case EXIT_BUTTON:
-                        if(event.value == BUTTON_DOWN)
-                        {
-                            qInfo("Exit Pressed");
-                            exit(EXIT_BY_BUTTON);
-                        }
-                        break;
+                buttonState[ ButtonID (event.number) ] = bool (event.value);
 
-                    case X_BUTTON:
-                        if(event.value == BUTTON_DOWN)
-                        {
-                            stepperMotor->brake();
-                            isBrakePressed = true;
-                        }
-                        else
-                        {
-                            stepperMotor->swithOff();
-                            isBrakePressed = false;
-                        }
-                        break;
-
-                    case RIGHT_BUMPER:
-                        if(event.value == BUTTON_DOWN)
-                        {
-                            LightsAndServoMsg message;
-                            message.device = TURN_SIGNAL;
-                            message.turnSignalCommand = RIGHT;
-                            lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
-                        }
-                        break;
-
-                    case LEFT_BUMPER:
-                        if(event.value == BUTTON_DOWN)
-                        {
-                            LightsAndServoMsg message;
-                            message.device = TURN_SIGNAL;
-                            message.turnSignalCommand = LEFT;
-                            lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
-                        }
-                        break;
-
-                    default:
-                        qInfo() << "Uknown button :" << event.number << "value : " << event.value;
-                        break;
-                }
+                handleInput( ButtonID (event.number) );
             }
             else if (event.isAxis())
             {
-                switch (event.number)
-                {
-                    case RIGHT_TRIGGER:
-                        if(isBrakePressed == false)
-                        {
-                            if(event.value != MIN_AXIS_VALUE &&  event.value >= MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE && isLeftTriggerPressed == false)
-                            {
-                                stepperMotor->move( FORWARD, axisToSpeed( event.value ) );
-                                isRightTriggerPressed = true;
-                            }
-                            else
-                            {
-                                stepperMotor->swithOff();
-                                isRightTriggerPressed = false;
-                            }
-                        }
-                        break;
+                axisState[ AxisID (event.number) ] = event.value;
 
-                case LEFT_TRIGGER:
-                    if(isBrakePressed == false)
-                    {
-                        if(event.value != MIN_AXIS_VALUE &&  event.value >= MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE && isRightTriggerPressed == false)
-                        {
-                            stepperMotor->move( BACKWARD, axisToSpeed( event.value ) );
-                            isLeftTriggerPressed = true;
-                        }
-                        else
-                        {
-                            stepperMotor->swithOff();
-                            isLeftTriggerPressed = false;
-                        }
-                    }
-                    break;
-
-                case LEFT_X_AXIS:
-                    LightsAndServoMsg message;
-                    message.device = SERVO;
-                    message.servoInfo.command = TURN;
-                    message.servoInfo.degrees = axisToDegrees(event.value);
-                    lightsAndServoSerial->send( (unsigned char *) &message, sizeof(LightsAndServoMsg) );
-                    break;
-
-                    default:
-                        qInfo() << "Uknown axis :" << event.number << "value : " << event.value;
-                        break;
-                }
+                handleInput( AxisID (event.number) );
             }
         }
     }
 }
 
+bool Gamepad::isButtonPressed(ButtonID buttonID)
+{
+    return buttonState.find(buttonID)->second;
+}
 
+short Gamepad::getAxisValue(AxisID axisID)
+{
+    return axisState.find(axisID)->second;
+}
+
+void Gamepad::handleInput(ButtonID buttonID)
+{
+    switch (buttonID)
+    {
+        case EXIT_BUTTON:
+            if(isButtonPressed(buttonID) )
+            {
+                qInfo("Exit Pressed");
+                stepperMotor->swithOff();
+                exit(EXIT_BY_BUTTON);
+            }
+            break;
+
+        case X_BUTTON:
+            if(isButtonPressed(buttonID) )
+            {
+                stepperMotor->brake();
+            }
+            else
+            {
+                stepperMotor->swithOff();
+            }
+            break;
+
+        case RIGHT_BUMPER:
+            //TODO
+            break;
+
+        case LEFT_BUMPER:
+            //TODO
+            break;
+
+        default:
+            qInfo() << "Uknown button :" << buttonID;
+            break;
+    }
+}
+
+
+void Gamepad::handleInput(AxisID axisID)
+{
+    switch (axisID)
+    {
+        case RIGHT_TRIGGER:
+            if( ! isButtonPressed(X_BUTTON) )
+            {
+                    if( getAxisValue(LEFT_TRIGGER) < MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE)
+                    {
+                        stepperMotor->move( FORWARD, axisToSpeed( getAxisValue(RIGHT_TRIGGER) ) );
+                    }
+                    else
+                    {
+                        stepperMotor->swithOff();
+                    }
+            }
+            else
+            {
+                stepperMotor->brake();
+            }
+            break;
+
+        case LEFT_TRIGGER:
+            if( ! isButtonPressed(X_BUTTON) )
+            {
+                    if( getAxisValue(RIGHT_TRIGGER) < MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE)
+                    {
+                        stepperMotor->move( BACKWARD, axisToSpeed( getAxisValue(LEFT_TRIGGER) ) );
+                    }
+                    else
+                    {
+                        stepperMotor->swithOff();
+                    }
+            }
+            else
+            {
+                stepperMotor->brake();
+            }
+            break;
+
+        case LEFT_X_AXIS:
+            //TODO
+            break;
+
+        default:
+            qInfo() << "Uknown axis :" << axisID;
+            break;
+    }
+}
