@@ -7,8 +7,8 @@ class SerialPort
 {
 public:
     SerialPort(const S8 * device);
-    bool send(U8 * buffer, int size);
-    void read(U8 *buffer, int size);
+    bool send(U8 * buffer, S16 size);
+    void read(U8 *buffer, S16 size);
 
 private:
     const S16 CPORT_NR;

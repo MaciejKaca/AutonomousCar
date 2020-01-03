@@ -41,7 +41,7 @@ enum AxisID
     LEFT_TRIGGER = 5
 };
 
-const char  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";
+const S8  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";
 
 enum StepperMotorCommand
 {

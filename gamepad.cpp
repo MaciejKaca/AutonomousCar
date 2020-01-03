@@ -11,7 +11,7 @@
 #include "steppermotor.h"
 #include "RS-232/rs232.h"
 
-Gamepad::Gamepad(StepperMotor * _stepperMotor, SerialPort * _lightsAndServoSerial) : lightsAndServoSerial(_lightsAndServoSerial)
+Gamepad::Gamepad(StepperMotor * _stepperMotor, Servo * _servo)
 {    
     if (!joystick.isFound())
     {
@@ -19,22 +19,19 @@ Gamepad::Gamepad(StepperMotor * _stepperMotor, SerialPort * _lightsAndServoSeria
         exit(EXIT_BY_MISSING_GAMEPAD);
     }
 
-    isBrakePressed = false;
-    isLeftTriggerPressed = false;
-    isRightTriggerPressed = false;
-
     stepperMotor = _stepperMotor;
+    servo = _servo;
 }
 
 void Gamepad::clearInput()
 {
-    for(uint8_t i = 0; i <= NUMBER_OF_BUTTONS; i++)
+    for(U8 i = 0; i <= NUMBER_OF_BUTTONS; i++)
     {
         JoystickEvent event;
         joystick.sample(&event);
     }
 
-    for(uint8_t i = 0; i <= NUMBER_OF_AXIS; i++)
+    for(U8 i = 0; i <= NUMBER_OF_AXIS; i++)
     {
         JoystickEvent event;
         joystick.sample(&event);
@@ -192,7 +189,7 @@ void Gamepad::handleInput(AxisID axisID)
             break;
 
         case LEFT_X_AXIS:
-            //TODO
+            servo->turn( axisToDegrees( getAxisValue(LEFT_X_AXIS) ) );
             break;
 
         default:

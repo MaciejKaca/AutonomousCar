@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-SerialPort::SerialPort(const char * device) : CPORT_NR( RS232_GetPortnr(device) )
+SerialPort::SerialPort(const S8 * device) : CPORT_NR( RS232_GetPortnr( (const char *) device) )
 {
     open_comport();
 }

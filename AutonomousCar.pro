@@ -30,7 +30,8 @@ SOURCES += \
         gamepad.cpp \
         steppermotor.cpp \
     serialport.cpp \
-    RS-232/rs232.c
+    RS-232/rs232.c \
+    servo.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
         common.h \
         steppermotor.h \
     serialport.h \
-    CarInterface/interface.h
+    CarInterface/interface.h \
+    servo.h
 
 FORMS += \
         mainwindow.ui
