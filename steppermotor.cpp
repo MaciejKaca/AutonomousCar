@@ -38,7 +38,7 @@ void StepperMotor::validateSpeed(U16 &speed)
     delay = MIN_SPEED + (MAX_SPEED - speed);
 }
 
-bool StepperMotor::makeStep(StepperMotorDirection direction, U16 speed)
+bool StepperMotor::makeStep(const StepperMotorDirection direction,  U16 speed)
 {
     validateSpeed(speed);
 
@@ -92,7 +92,7 @@ void StepperMotor::checkAndStopThread()
     }
 }
 
-void StepperMotor::move(StepperMotorDirection _direction, U16 _speed)
+void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _speed)
 {
     direction = _direction;
     speed = _speed;

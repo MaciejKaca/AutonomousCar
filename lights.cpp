@@ -28,34 +28,53 @@ TurnSignalCommand Lights::getTurnSignalStatus()
     return turnSignalStatus;
 }
 
-void Lights::setTurnSignal(TurnSignalCommand command)
+void Lights::setTurnSignal(const TurnSignalCommand command)
 {
+    turnSignalStatus = command;
+
     LightsAndServoMsg message;
     message.device = TURN_SIGNAL;
-    message.turnSignalCommand = command;
+    message.turnSignalCommand = turnSignalStatus;
     serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
 }
 
-void Lights::setHeadLight(HeadLightCommand command)
+void Lights::setHeadLight(const HeadLightCommand command)
 {
+    headLightStatus = command;
+
     LightsAndServoMsg message;
     message.device = HEADLIGHT;
-    message.headLightCommand = command;
+    message.headLightCommand = headLightStatus;
     serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
 }
 
-void Lights::setBrakeLights(BrakeLightsCommand command)
+void Lights::setBrakeLights(const BrakeLightsCommand command)
 {
+    brakeLightsStatus = command;
+
+    if(command == BRAKE_LIGHT_OFF)
+    {
+        brakeLightsStatus = brakeLightsWhenOffStatus;
+    }
     LightsAndServoMsg message;
     message.device = BRAKE_LIGHT;
-    message.brakeLightsCommand = command;
+    message.brakeLightsCommand = brakeLightsStatus;
     serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
 }
 
-void Lights::setReverseLight(ReverseLightCommand command)
+void Lights::setReverseLight(const ReverseLightCommand command)
 {
+    reverseLightStatus = command;
+
     LightsAndServoMsg message;
     message.device = REVERSE_LIGHT;
-    message.reverseLightCommand = command;
+    message.reverseLightCommand = reverseLightStatus;
     serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+}
+
+void Lights::setBrakeLightsWhenOff(BrakeLightsCommand command)
+{
+    brakeLightsWhenOffStatus = command;
+
+    setBrakeLights(brakeLightsWhenOffStatus);
 }

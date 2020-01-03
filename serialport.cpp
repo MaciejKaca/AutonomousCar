@@ -21,7 +21,7 @@ void SerialPort::open_comport()
     }
 }
 
-bool SerialPort::send(U8 *buffer, S16 size)
+bool SerialPort::send(U8 * buffer,const S16 size)
 {
     if( RS232_SendBuf(CPORT_NR, buffer, size) > 0)
     {
@@ -33,7 +33,7 @@ bool SerialPort::send(U8 *buffer, S16 size)
     }
 }
 
-void SerialPort::read(U8 *buffer, S16 size)
+void SerialPort::read(U8 * buffer,const S16 size)
 {
     RS232_PollComport(CPORT_NR, buffer, size);
 }

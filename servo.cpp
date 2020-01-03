@@ -11,7 +11,7 @@ S8 Servo::getAngle()
     return angle;
 }
 
-void Servo::turn(S8 _angle)
+void Servo::turn(const S8 _angle)
 {
     if(validateAngle(_angle))
     {
@@ -25,7 +25,7 @@ void Servo::turn(S8 _angle)
     }
 }
 
-void Servo::setNewCenter(S8 _angle)
+void Servo::setNewCenter(const S8 _angle)
 {
     LightsAndServoMsg message;
     message.device = SERVO;
@@ -34,7 +34,7 @@ void Servo::setNewCenter(S8 _angle)
     serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
 }
 
-bool Servo::validateAngle(S8 _angle)
+bool Servo::validateAngle(const S8 _angle)
 {
     if(MIN_ANGLE <= _angle && _angle <= MAX_ANGLE)
     {

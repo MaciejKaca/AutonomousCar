@@ -13,10 +13,11 @@ public:
     BrakeLightsCommand getBrakeLightsStatus();
     ReverseLightCommand getReverseLightStatus();
 
-    void setTurnSignal(TurnSignalCommand command);
-    void setHeadLight(HeadLightCommand command);
-    void setBrakeLights(BrakeLightsCommand command);
-    void setReverseLight(ReverseLightCommand command);
+    void setTurnSignal(const TurnSignalCommand command);
+    void setHeadLight(const HeadLightCommand command);
+    void setBrakeLights(const BrakeLightsCommand command);
+    void setBrakeLightsWhenOff(const BrakeLightsCommand command);
+    void setReverseLight(const ReverseLightCommand command);
 
 private:
     SerialPort * serialPort;
@@ -24,6 +25,7 @@ private:
     TurnSignalCommand turnSignalStatus;
     HeadLightCommand headLightStatus;
     BrakeLightsCommand brakeLightsStatus;
+    BrakeLightsCommand brakeLightsWhenOffStatus;
     ReverseLightCommand reverseLightStatus;
 };
 

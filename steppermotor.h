@@ -10,10 +10,10 @@ class StepperMotor
 {
     public:
         StepperMotor();
-        void move(StepperMotorDirection direction, U16 speed);
+        void move(const StepperMotorDirection direction, const U16 speed);
         void brake();
         void swithOff();
-        bool makeStep(StepperMotorDirection direction, U16 speed);
+        bool makeStep(const StepperMotorDirection direction,  U16 speed);
 
     private:
         U16 speed;
