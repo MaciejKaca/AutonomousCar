@@ -31,7 +31,8 @@ SOURCES += \
         steppermotor.cpp \
     serialport.cpp \
     RS-232/rs232.c \
-    servo.cpp
+    servo.cpp \
+    lights.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS += \
         steppermotor.h \
     serialport.h \
     CarInterface/interface.h \
-    servo.h
+    servo.h \
+    lights.h
 
 FORMS += \
         mainwindow.ui
