@@ -27,7 +27,7 @@ StepperMotor::StepperMotor()
     threadActive = false;
 }
 
-void StepperMotor::validateSpeed(uint16_t &speed)
+void StepperMotor::validateSpeed(U16 &speed)
 {
     if(speed > MAX_SPEED)
         speed = MAX_SPEED;
@@ -38,7 +38,7 @@ void StepperMotor::validateSpeed(uint16_t &speed)
     delay = MIN_SPEED + (MAX_SPEED - speed);
 }
 
-bool StepperMotor::makeStep(StepperMotorDirection direction, uint16_t speed)
+bool StepperMotor::makeStep(StepperMotorDirection direction, U16 speed)
 {
     validateSpeed(speed);
 
@@ -92,7 +92,7 @@ void StepperMotor::checkAndStopThread()
     }
 }
 
-void StepperMotor::move(StepperMotorDirection _direction, uint16_t _speed)
+void StepperMotor::move(StepperMotorDirection _direction, U16 _speed)
 {
     direction = _direction;
     speed = _speed;

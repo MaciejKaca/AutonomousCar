@@ -6,6 +6,11 @@
 
 #include "CarInterface/interface.h"
 
+typedef uint16_t U16;
+typedef int16_t S16;
+typedef uint8_t U8;
+typedef int8_t S8;
+
 const uint8_t GAMEPAD_REFRESH_TIME = 1; //Time in milliseconds
 
 const uint8_t EXIT_BY_BUTTON = 1;

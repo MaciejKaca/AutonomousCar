@@ -47,7 +47,7 @@ inline bool Gamepad::isGamepadConnected()
     return (stat (gamepadPath.c_str(), &buffer) == 0);
 }
 
-uint16_t Gamepad::axisToSpeed(int16_t axisValue)
+U16 Gamepad::axisToSpeed(S16 axisValue)
 {
     if(axisValue > ( MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE ) && axisValue < 0)
     {
@@ -63,9 +63,9 @@ uint16_t Gamepad::axisToSpeed(int16_t axisValue)
     }
 }
 
-int8_t Gamepad::axisToDegrees(int16_t axisValue)
+S8 Gamepad::axisToDegrees(S16 axisValue)
 {
-    return  int8_t( axisValue / AXIS_TO_DEEGRES_SCALE );
+    return  S8( axisValue / AXIS_TO_DEEGRES_SCALE );
 }
 
 void Gamepad::readGamepadInput()

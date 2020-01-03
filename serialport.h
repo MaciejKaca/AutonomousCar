@@ -1,16 +1,18 @@
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
+#include "common.h"
+
 class SerialPort
 {
 public:
-    SerialPort(const char * device);
-    bool send(unsigned char * buffer, int size);
-    void read(unsigned char *buffer, int size);
+    SerialPort(const S8 * device);
+    bool send(U8 * buffer, int size);
+    void read(U8 *buffer, int size);
 
 private:
-    const int CPORT_NR;
-    const int BAUD_RATE = 9600;
+    const S16 CPORT_NR;
+    const S16 BAUD_RATE = 9600;
     void open_comport();
 };
 
