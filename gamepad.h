@@ -1,5 +1,4 @@
-#ifndef GAMEPAD_H
-#define GAMEPAD_H
+#pragma once
 
 #include "common.h"
 #include "steppermotor.h"
@@ -8,7 +7,6 @@
 
 #include <joystick/joystick.hh>
 #include <unistd.h>
-#include <math.h>
 #include <map>
 
 class Gamepad
@@ -40,5 +38,3 @@ class Gamepad
 
         short getAxisValue(const AxisID axisID);
 };
-
-#endif // GAMEPAD_H

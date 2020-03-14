@@ -1,5 +1,4 @@
-#ifndef LIGHTS_H
-#define LIGHTS_H
+#pragma once
 
 #include "common.h"
 #include "serialport.h"
@@ -28,5 +27,3 @@ private:
     BrakeLightsCommand brakeLightsWhenOffStatus;
     ReverseLightCommand reverseLightStatus;
 };
-
-#endif // LIGHTS_H

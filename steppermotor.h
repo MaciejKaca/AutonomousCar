@@ -1,8 +1,6 @@
-#ifndef STEPPERMOTOR_H
-#define STEPPERMOTOR_H
+#pragma once
 
 #include "common.h"
-#include "steppermotor.h"
 
 #include <thread>
 
@@ -25,5 +23,3 @@ class StepperMotor
         void constantMovement();
         bool threadActive;
 };
-
-#endif // STEPPERMOTOR_H

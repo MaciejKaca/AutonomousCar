@@ -1,10 +1,10 @@
-#ifndef BUTTONS_H
-#define BUTTONS_H
-
-#include <cstdint>
-#include <stdlib.h>
+#pragma once
 
 #include "CarInterface/interface.h"
+
+#include <cstdint>
+#include <cstdlib>
+#include <cmath>
 
 typedef uint16_t U16;
 typedef int16_t S16;
@@ -67,7 +67,5 @@ const U8 STEPPER_DIRECTION_PIN = 28;
 
 const U8 TOTAL_WHEEL_ANGLE = 80;
 
-static const float AXIS_TO_SPEED_SCALE =  float( abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(MAX_SPEED - MIN_SPEED);
-static const float AXIS_TO_DEEGRES_SCALE =  float( abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(TOTAL_WHEEL_ANGLE);
-
-#endif // BUTTONS_H
+static const float AXIS_TO_SPEED_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(MAX_SPEED - MIN_SPEED);
+static const float AXIS_TO_DEEGRES_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(TOTAL_WHEEL_ANGLE);

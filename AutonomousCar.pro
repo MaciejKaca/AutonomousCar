@@ -25,30 +25,28 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp \
         joystick/joystick.cc \
         gamepad.cpp \
         steppermotor.cpp \
-    serialport.cpp \
-    RS-232/rs232.c \
-    servo.cpp \
-    lights.cpp
+        serialport.cpp \
+        RS-232/rs232.c \
+        servo.cpp \
+        lights.cpp
 
 HEADERS += \
-        mainwindow.h \
         gamepad.h \
         common.h \
         steppermotor.h \
-    serialport.h \
-    CarInterface/interface.h \
-    servo.h \
-    lights.h
-
-FORMS += \
-        mainwindow.ui
+        serialport.h \
+        CarInterface/interface.h \
+        servo.h \
+        lights.h
 
 target.path = /home/pi
 INSTALLS += target
 
-LIBS += \
-              -lwiringPi \
+LIBS += -lwiringPi \
+
+INCLUDEPATH += \
+    /home/ekacmac/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/include/c++/4.8.3 \
+    /home/ekacmac/raspi/sysroot/usr/include \

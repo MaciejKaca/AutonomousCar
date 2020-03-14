@@ -1,5 +1,4 @@
-#ifndef SERVO_H
-#define SERVO_H
+#pragma once
 
 #include "common.h"
 #include "serialport.h"
@@ -19,5 +18,3 @@ private:
     S8 angle;
     bool validateAngle(const S8 _angle);
 };
-
-#endif // SERVO_H
