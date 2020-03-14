@@ -3,27 +3,42 @@
 
 #include "common.h"
 #include "steppermotor.h"
+#include "servo.h"
+#include "lights.h"
 
 #include <joystick/joystick.hh>
 #include <unistd.h>
 #include <math.h>
+#include <map>
 
 class Gamepad
 {
-public:
-    Gamepad();
-    void handleInput();
+    public:
+        Gamepad(StepperMotor *  _stepperMotor, Servo * _servo, Lights * _lights);
+        void readGamepadInput();
 
-private:
-    Joystick joystick;
-    void clearInput();
-    bool isGamepadConnected();
-    uint16_t axisToSpeed(int16_t axisValue);
-    const std::string gamepadPath = "/dev/input/js0";
-    StepperMotor stepperMotor;
-    bool isBrakePressed;
-    bool isLeftTriggerPressed;
-    bool isRightTriggerPressed;
+    private:
+        Joystick joystick;
+        StepperMotor * stepperMotor;
+        Servo * servo;
+        Lights * lights;
+
+        void clearInput();
+        bool isGamepadConnected();
+        const std::string gamepadPath = "/dev/input/js0";
+
+        U16 axisToSpeed(const S16 axisValue);
+        S8 axisToDegrees(const S16 axisValue);
+
+        std::map<ButtonID, bool> buttonState;
+        std::map<AxisID, short> axisState;
+
+        void handleInput(const ButtonID buttonID);
+        void handleInput(const AxisID axisID);
+
+        bool isButtonPressed(const ButtonID buttonID);
+
+        short getAxisValue(const AxisID axisID);
 };
 
 #endif // GAMEPAD_H

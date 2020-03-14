@@ -10,16 +10,16 @@ class StepperMotor
 {
     public:
         StepperMotor();
-        void move(StepperMotorDirection direction, uint16_t speed);
+        void move(const StepperMotorDirection direction, const U16 speed);
         void brake();
         void swithOff();
-        bool makeStep(StepperMotorDirection direction, uint16_t speed);
+        bool makeStep(const StepperMotorDirection direction,  U16 speed);
 
     private:
-        uint16_t speed;
-        uint16_t delay;
+        U16 speed;
+        U16 delay;
         StepperMotorDirection direction;
-        void validateSpeed(uint16_t & speed);
+        void validateSpeed(U16 & speed);
         std::thread stepperThread;
         void checkAndStopThread();
         void constantMovement();
