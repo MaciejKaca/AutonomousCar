@@ -9,3 +9,7 @@ HEADERS += \
 
 SOURCES += \
         main.cpp
+
+INCLUDEPATH += \
+    /home/ekacmac/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/include/c++/4.8.3 \
+    /home/ekacmac/raspi/sysroot/usr/include
