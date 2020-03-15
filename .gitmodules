@@ -1,0 +1,9 @@
+[submodule "CarInterface"]
+	path = CarInterface
+	url = https://github.com/MaciejKaca/CarInterface.git
+[submodule "RS-232"]
+	path = RS-232
+	url = https://gitlab.com/Teuniz/RS-232.git
+[submodule "joystick"]
+	path = joystick
+	url = https://github.com/drewnoakes/joystick.git
