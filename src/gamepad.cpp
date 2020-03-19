@@ -1,5 +1,5 @@
-#include "gamepad.h"
-#include "common.h"
+#include <inc/gamepad.h>
+#include <inc/common.h>
 
 #include <QDebug>
 #include <thread>
@@ -8,15 +8,29 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "steppermotor.h"
-#include "RS-232/rs232.h"
+#include <inc/steppermotor.h>
+#include <RS-232/rs232.h>
 
-Gamepad::Gamepad(StepperMotor *  _stepperMotor, Servo * _servo, Lights * _lights)
-{    
-    if (!joystick.isFound())
+Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights)
+{
+    joystick = new Joystick();
+    if (!joystick->isFound())
     {
         qCritical( "Gamepad not found");
         exit(EXIT_BY_MISSING_GAMEPAD);
+    }
+
+    stepperMotor = _stepperMotor;
+    servo = _servo;
+    lights = _lights;
+}
+
+Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick)
+{
+    joystick = _joystick;
+    if (!joystick->isFound())
+    {
+        qCritical( "Gamepad not found TEST");
     }
 
     stepperMotor = _stepperMotor;
@@ -29,13 +43,13 @@ void Gamepad::clearInput()
     for(U8 i = 0; i <= NUMBER_OF_BUTTONS; i++)
     {
         JoystickEvent event;
-        joystick.sample(&event);
+        joystick->sample(&event);
     }
 
     for(U8 i = 0; i <= NUMBER_OF_AXIS; i++)
     {
         JoystickEvent event;
-        joystick.sample(&event);
+        joystick->sample(&event);
     }
 }
 
@@ -82,7 +96,7 @@ void Gamepad::readGamepadInput()
 
         std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_REFRESH_TIME));
 
-        if(joystick.sample(&event))
+        if(joystick->sample(&event))
         {
             if(event.isButton())
             {
@@ -189,7 +203,6 @@ void Gamepad::handleInput(const ButtonID buttonID)
             break;
     }
 }
-
 
 void Gamepad::handleInput(AxisID axisID)
 {

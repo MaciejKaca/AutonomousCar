@@ -40,7 +40,8 @@ HEADERS += \
         inc/serialport.h \
         CarInterface/interface.h \
         inc/servo.h \
-        inc/lights.h
+        inc/lights.h \
+        RS-232/rs232.h
 
 target.path = /home/pi
 INSTALLS += target
@@ -50,4 +51,6 @@ LIBS += -lwiringPi \
 INCLUDEPATH += \
     /home/ekacmac/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/include/c++/4.8.3 \
     /home/ekacmac/raspi/sysroot/usr/include \
-    $$PWD/inc \
+    $$PWD/Tests \
+#    /home/ekacmac/Desktop/googletest/googletest/include \
+#    /home/ekacmac/Desktop/googletest/googlemock/include \

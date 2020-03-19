@@ -1,7 +1,7 @@
-#include "serialport.h"
-#include "common.h"
+#include <inc/serialport.h>
+#include <inc/common.h>
 
-#include "RS-232/rs232.h"
+#include <RS-232/rs232.h>
 
 #include <QDebug>
 

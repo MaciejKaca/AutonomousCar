@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common.h"
-#include "steppermotor.h"
-#include "servo.h"
-#include "lights.h"
+#include <inc/common.h>
+#include <inc/steppermotor.h>
+#include <inc/servo.h>
+#include <inc/lights.h>
 
 #include <joystick/joystick.hh>
 #include <unistd.h>
@@ -11,15 +11,18 @@
 
 class Gamepad
 {
+    friend class GamepadTest;
+
     public:
-        Gamepad(StepperMotor *  _stepperMotor, Servo * _servo, Lights * _lights);
+        Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights);
+        Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick);
         void readGamepadInput();
 
     private:
-        Joystick joystick;
-        StepperMotor * stepperMotor;
-        Servo * servo;
-        Lights * lights;
+        Joystick *joystick;
+        StepperMotor *stepperMotor;
+        Servo *servo;
+        Lights *lights;
 
         void clearInput();
         bool isGamepadConnected();

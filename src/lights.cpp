@@ -1,4 +1,4 @@
-#include "lights.h"
+#include <inc/lights.h>
 
 Lights::Lights(SerialPort * _serialPort) : serialPort(_serialPort)
 {

@@ -1,7 +1,7 @@
-#include "gamepad.h"
-#include "serialport.h"
-#include "servo.h"
-#include "lights.h"
+#include <inc/gamepad.h>
+#include <inc/serialport.h>
+#include <inc/servo.h>
+#include <inc/lights.h>
 
 #include <future>
 

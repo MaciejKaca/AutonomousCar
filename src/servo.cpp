@@ -1,4 +1,4 @@
-#include "servo.h"
+#include <inc/servo.h>
 
 Servo::Servo(SerialPort * _serialPort) : serialPort(_serialPort)
 {

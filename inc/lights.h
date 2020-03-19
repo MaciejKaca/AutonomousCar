@@ -5,8 +5,9 @@
 
 class Lights
 {
+
 public:
-    Lights(SerialPort * _serialPort);
+    Lights(SerialPort *_serialPort);
     TurnSignalCommand getTurnSignalStatus();
     HeadLightCommand getHeadLightStatus();
     BrakeLightsCommand getBrakeLightsStatus();

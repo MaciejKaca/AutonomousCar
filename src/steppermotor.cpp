@@ -1,8 +1,9 @@
-#include "steppermotor.h"
-#include "common.h"
+#include <inc/steppermotor.h>
+#include <inc/common.h>
 
 #include <wiringPi.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <chrono>
 #include <thread>
 #include <future>
