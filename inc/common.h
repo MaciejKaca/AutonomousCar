@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CarInterface/interface.h>
+#include <QDebug>
 
 #include <cstdint>
 #include <cstdlib>
@@ -28,10 +29,10 @@ const S16 MIN_AXIS_VALUE = -32767;
 
 enum ButtonID
 {
-    EXIT_BUTTON = 11,
-    X_BUTTON = 3,
-    RIGHT_BUMPER = 7,
-    LEFT_BUMPER = 6,
+    EXIT_BUTTON = 7,
+    X_BUTTON = 2,
+    RIGHT_BUMPER = 5,
+    LEFT_BUMPER = 4,
 };
 
 enum AxisID
@@ -43,6 +44,7 @@ enum AxisID
 };
 
 const S8  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";
+const S8  LIGHTS_AND_SERVO_PORT_BACKUP [] = "ttyUSB1";
 
 enum StepperMotorCommand
 {
@@ -69,3 +71,5 @@ const U8 TOTAL_WHEEL_ANGLE = 80;
 
 static const float AXIS_TO_SPEED_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(MAX_SPEED - MIN_SPEED);
 static const float AXIS_TO_DEEGRES_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(TOTAL_WHEEL_ANGLE);
+
+static const S16 AXIS_MIN_TRIGGER_POSITION = MIN_AXIS_VALUE + static_cast<S16>(AXIS_TO_SPEED_SCALE);

@@ -12,6 +12,9 @@ class StepperMotor
         void brake();
         void swithOff();
         bool makeStep(const StepperMotorDirection direction,  U16 speed);
+        const bool &isThreadActive();
+        const U16 &getSpeed();
+        const StepperMotorDirection &getDirection();
 
     private:
         U16 speed;
@@ -21,5 +24,5 @@ class StepperMotor
         std::thread stepperThread;
         void checkAndStopThread();
         void constantMovement();
-        bool threadActive;
+        bool threadStatus;
 };
