@@ -2,14 +2,15 @@
 
 #include "common.h"
 #include "serialport.h"
+#include "Base/ServoBase.h"
 
-class Servo
+class Servo : ServoBase
 {
 public:
     Servo(SerialPort * _serialPort);
-    void turn(const S8 _angle);
-    void setNewCenter(const S8 _angle);
-    S8 getAngle();
+    void turn(const S8 &_angle) override;
+    void setNewCenter(const S8 &_angle) override;
+    const S8 &getAngle() override;
     const S8 MIN_ANGLE = -40;
     const S8 MAX_ANGLE = 40;
 

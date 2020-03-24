@@ -3,11 +3,11 @@
 Lights::Lights(SerialPort * _serialPort) : serialPort(_serialPort)
 {
     qInfo("in Lights, initializing constructor");
+    brakeLightsWhenOffStatus = BRAKE_LIGHT_OFF;
     turnSignalStatus = TURN_SIGNAL_OFF;
     headLightStatus = HEADLIGHT_OFF;
     brakeLightsStatus = BRAKE_LIGHT_OFF;
     reverseLightStatus = REVERSE_LIGHT_OFF;
-    brakeLightsWhenOffStatus = BRAKE_LIGHT_OFF;
 
     this->setTurnSignal(turnSignalStatus);
     this->setHeadLight(headLightStatus);
@@ -49,7 +49,7 @@ void Lights::setTurnSignal(const TurnSignalCommand &command)
     message.turnSignalCommand = turnSignalStatus;
 
     qInfo() << "in Lights::setTurnSignal():" << turnSignalStatus;
-    serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+    serialPort->send((U8 *)&message, sizeof(LightsAndServoMsg));
 }
 
 void Lights::setHeadLight(const HeadLightCommand &command)
@@ -61,7 +61,7 @@ void Lights::setHeadLight(const HeadLightCommand &command)
     message.headLightCommand = headLightStatus;
 
     qInfo() << "in Lights::setHeadLight():" << headLightStatus;
-    serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+    serialPort->send((U8 *) &message, sizeof(LightsAndServoMsg));
 }
 
 void Lights::setBrakeLights(const BrakeLightsCommand &command)
@@ -77,7 +77,7 @@ void Lights::setBrakeLights(const BrakeLightsCommand &command)
     message.brakeLightsCommand = brakeLightsStatus;
 
     qInfo() << "in Lights::setBrakeLights():" << brakeLightsWhenOffStatus;
-    serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+    serialPort->send((U8 *)&message, sizeof(LightsAndServoMsg));
 }
 
 void Lights::setReverseLight(const ReverseLightCommand &command)
@@ -89,7 +89,7 @@ void Lights::setReverseLight(const ReverseLightCommand &command)
     message.reverseLightCommand = reverseLightStatus;
 
     qInfo() << "in Lights::setReverseLight():" << reverseLightStatus;
-    serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+    serialPort->send((U8 *)&message, sizeof(LightsAndServoMsg));
 }
 
 void Lights::setBrakeLightsWhenOff(const BrakeLightsCommand &command)

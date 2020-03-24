@@ -9,14 +9,16 @@
 #include <unistd.h>
 #include <map>
 
-class Gamepad
+#include "Base/GamepadBase.h"
+
+class Gamepad : GamepadBase
 {
     friend class GamepadTest;
 
     public:
         Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights);
         Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick);
-        void readGamepadInput();
+        void readGamepadInput() override;
         ~Gamepad();
 
     private:

@@ -3,7 +3,8 @@
 
 #include <RS-232/rs232.h>
 
-SerialPort::SerialPort(const S8 * device) : CPORT_NR( RS232_GetPortnr( (const char *) device) )
+SerialPort::SerialPort() : CPORT_NR(RS232_GetPortnr((const char *)LIGHTS_AND_SERVO_PORT)),
+    CPORT_NR_BACKUP(RS232_GetPortnr((const char *)LIGHTS_AND_SERVO_PORT_BACKUP))
 {
     qInfo("in SerialPort, initializing constructor");
     open_comport();
@@ -16,9 +17,7 @@ void SerialPort::open_comport()
     if(RS232_OpenComport(CPORT_NR, BAUD_RATE, mode))
     {
         qCritical("in SerialPort::open_comport(): missing arduino. Trying backup.");
-        const S16 BACKUP_CPORT_NR = RS232_GetPortnr( (const char *) LIGHTS_AND_SERVO_PORT_BACKUP);
-
-        if(RS232_OpenComport(BACKUP_CPORT_NR, BAUD_RATE, mode))
+        if(RS232_OpenComport(CPORT_NR_BACKUP, BAUD_RATE, mode))
         {
             qCritical("in SerialPort::open_comport(): missing arduino on backup.");
             exit(EXIT_BY_MISSING_MODULE);
@@ -34,7 +33,7 @@ void SerialPort::open_comport()
     }
 }
 
-bool SerialPort::send(U8 * buffer,const S16 size)
+bool SerialPort::send(U8 * buffer,const S16 &size)
 {
     if( RS232_SendBuf(CPORT_NR, buffer, size) > 0)
     {
@@ -48,7 +47,7 @@ bool SerialPort::send(U8 * buffer,const S16 size)
     }
 }
 
-void SerialPort::read(U8 * buffer,const S16 size)
+void SerialPort::read(U8 * buffer,const S16 &size)
 {
     qInfo("in SerialPort::read()");
     RS232_PollComport(CPORT_NR, buffer, size);

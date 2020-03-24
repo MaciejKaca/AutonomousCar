@@ -43,8 +43,8 @@ enum AxisID
     ARROW_Y_AXIS = 7
 };
 
-const S8  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";
-const S8  LIGHTS_AND_SERVO_PORT_BACKUP [] = "ttyUSB1";
+const S8 LIGHTS_AND_SERVO_PORT[] = "ttyUSB0";
+const S8 LIGHTS_AND_SERVO_PORT_BACKUP[] = "ttyUSB1";
 
 enum StepperMotorCommand
 {

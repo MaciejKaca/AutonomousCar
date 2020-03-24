@@ -1,20 +1,21 @@
 #pragma once
 
 #include "common.h"
+#include "Base/StepperMotorBase.h"
 
 #include <thread>
 
-class StepperMotor
+class StepperMotor : StepperMotorBase
 {
     public:
         StepperMotor();
-        void move(const StepperMotorDirection direction, const U16 speed);
-        void brake();
-        void swithOff();
-        bool makeStep(const StepperMotorDirection direction,  U16 speed);
-        const bool &isThreadActive();
-        const U16 &getSpeed();
-        const StepperMotorDirection &getDirection();
+        void move(const StepperMotorDirection direction, const U16 speed) override;
+        void brake() override;
+        void swithOff() override;
+        bool makeStep(const StepperMotorDirection direction,  U16 speed) override;
+        const bool &isThreadActive() override;
+        const U16 &getSpeed() override;
+        const StepperMotorDirection &getDirection() override;
 
     private:
         U16 speed;

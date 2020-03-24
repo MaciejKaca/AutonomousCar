@@ -7,12 +7,12 @@ Servo::Servo(SerialPort * _serialPort) : serialPort(_serialPort)
 }
 
 
-S8 Servo::getAngle()
+const S8 &Servo::getAngle()
 {
     return angle;
 }
 
-void Servo::turn(const S8 _angle)
+void Servo::turn(const S8 &_angle)
 {
     if(validateAngle(_angle))
     {
@@ -33,7 +33,7 @@ void Servo::turn(const S8 _angle)
     }
 }
 
-void Servo::setNewCenter(const S8 _angle)
+void Servo::setNewCenter(const S8 &_angle)
 {
     if(validateAngle(_angle))
     {

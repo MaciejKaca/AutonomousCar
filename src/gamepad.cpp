@@ -45,7 +45,7 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Jo
     joystick = _joystick;
     if (!joystick->isFound())
     {
-        qCritical( "in Gamepad::Gamepad, joystick not found");
+        qCritical("in Gamepad::Gamepad, joystick not found");
         exit(EXIT_BY_MISSING_GAMEPAD);
     }
     else
@@ -60,6 +60,7 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Jo
 
 Gamepad::~Gamepad()
 {
+    qInfo("in Gamepad::~Gamepad, destructor called");
     delete joystick;
 }
 

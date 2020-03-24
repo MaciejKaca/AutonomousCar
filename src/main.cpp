@@ -10,11 +10,12 @@ int main()
 {
     LOGUTILS::initLogging();
 
-    SerialPort lightsAndServoSerial(LIGHTS_AND_SERVO_PORT);
+    SerialPort lightsAndServoSerial;
     Servo servo(&lightsAndServoSerial);
     Lights lights(&lightsAndServoSerial);
     StepperMotor stepperMotor;
-    Gamepad gamepad(&stepperMotor, &servo, &lights);
+    static Gamepad gamepad(&stepperMotor, &servo, &lights);
 
     auto gamepadThread = std::async(std::launch::async, &Gamepad::readGamepadInput, &gamepad);
+    return 0;
 }
