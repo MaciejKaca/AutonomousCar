@@ -35,15 +35,16 @@ SOURCES += \
         src/logutils.cpp \
 
 HEADERS += \
-        inc/gamepad.h \
+        inc/Base/* \
         inc/common.h \
         inc/steppermotor.h \
         inc/serialport.h \
-        CarInterface/interface.h \
         inc/servo.h \
         inc/lights.h \
-        RS-232/rs232.h \
         inc/logutils.h \
+        inc/gamepad.h \
+        CarInterface/interface.h \
+        RS-232/rs232.h \
 
 target.path = /home/pi
 INSTALLS += target
