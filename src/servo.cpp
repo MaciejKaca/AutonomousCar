@@ -4,6 +4,7 @@ Servo::Servo(SerialPort * _serialPort) : serialPort(_serialPort)
 {
     qInfo("in Servo, initializing constructor");
     angle = 0;
+    this->turn(angle);
 }
 
 
@@ -25,7 +26,7 @@ void Servo::turn(const S8 &_angle)
 
         qInfo() << "in Servo::turn(): turning servo " << angle << "degrees";
 
-        serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+        serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
     }
     else
     {
@@ -44,7 +45,7 @@ void Servo::setNewCenter(const S8 &_angle)
 
         qInfo() << "in Servo::setNewCenter(): setting new center = " << angle << "degrees";
 
-        serialPort->send( (U8 *) &message, sizeof(LightsAndServoMsg) );
+        serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
     }
     else
     {
@@ -54,7 +55,7 @@ void Servo::setNewCenter(const S8 &_angle)
 
 bool Servo::validateAngle(const S8 _angle)
 {
-    if(MIN_ANGLE <= _angle && _angle <= MAX_ANGLE)
+    if(MIN_ANGLE<=_angle && _angle<=MAX_ANGLE)
     {
         qInfo() << "in Servo::validateAngle(): Angle valid = " << _angle;
         return true;

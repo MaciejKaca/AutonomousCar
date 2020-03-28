@@ -16,14 +16,23 @@ class StepperMotor : StepperMotorBase
         const bool &isThreadActive() override;
         const U16 &getSpeed() override;
         const StepperMotorDirection &getDirection() override;
+        static const U16 MAX_SPEED = 100;
+        static const U16 MIN_SPEED = 0;
 
     private:
         U16 speed;
         U16 delay;
         StepperMotorDirection direction;
-        void validateSpeed(U16 & speed);
+        bool validateSpeed(const U16 &speed);
         std::thread stepperThread;
         void checkAndStopThread();
         void constantMovement();
         bool threadStatus;
+
+        const U16 MAX_DELAY = 2000;
+        const U16 MIN_DELAY = 300;
+        const U8 STEPPER_ENABLE_PIN = 27;
+        const U8 STEPPER_STEP_PIN = 29;
+        const U8 STEPPER_DIRECTION_PIN = 28;
+
 };

@@ -1,5 +1,5 @@
-#include <inc/gamepad.h>
 #include <inc/common.h>
+#include <inc/gamepad.h>
 
 #include <thread>
 #include <chrono>
@@ -10,13 +10,18 @@
 #include <inc/steppermotor.h>
 #include <RS-232/rs232.h>
 
-Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights)
+Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
+      AXIS_TO_SPEED_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
+                          static_cast<float>(_stepperMotor->MAX_SPEED - StepperMotor::MIN_SPEED)),
+      AXIS_TO_ANGLE_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
+                          static_cast<float>(std::abs(servo->MIN_ANGLE)+servo->MAX_ANGLE)),
+      AXIS_MIN_TRIGGER_POSITION(JoystickEvent::MIN_AXES_VALUE + static_cast<S16>(AXIS_TO_SPEED_SCALE))
 {
     qInfo("in Gamepad, initializing constructor");
     joystick = new Joystick();
     if (!joystick->isFound())
     {
-        qCritical( "in Gamepad::Gamepad, joystick not found");
+        qCritical("in Gamepad::Gamepad, joystick not found");
         exit(EXIT_BY_MISSING_GAMEPAD);
     }
     else
@@ -35,11 +40,16 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights)
 
     axisState[AxisID::LEFT_X_AXIS] = 0;
     axisState[AxisID::ARROW_Y_AXIS] = 0;
-    axisState[AxisID::LEFT_TRIGGER] = MIN_AXIS_VALUE;
-    axisState[AxisID::RIGHT_TRIGGER] = MIN_AXIS_VALUE;
+    axisState[AxisID::LEFT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
+    axisState[AxisID::RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
 }
 
-Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick)
+Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick):
+      AXIS_TO_SPEED_SCALE(float(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
+                          float(_stepperMotor->MAX_SPEED - StepperMotor::MIN_SPEED)),
+      AXIS_TO_ANGLE_SCALE(float(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
+                            float(std::abs(servo->MIN_ANGLE)+servo->MAX_ANGLE)),
+      AXIS_MIN_TRIGGER_POSITION(JoystickEvent::MIN_AXES_VALUE + static_cast<S16>(AXIS_TO_SPEED_SCALE))
 {
     qInfo("in Gamepad, initializing constructor");
     joystick = _joystick;
@@ -88,13 +98,13 @@ inline bool Gamepad::isGamepadConnected()
 
 U16 Gamepad::axisToSpeed(const S16 &axisValue)
 {
-    if(axisValue > ( MIN_AXIS_VALUE + AXIS_TO_SPEED_SCALE ) && axisValue < 0)
+    if(axisValue > (JoystickEvent::MIN_AXES_VALUE + AXIS_TO_SPEED_SCALE) && axisValue < 0)
     {
-        return MIN_SPEED + ( std::ceil( float( MAX_AXIS_VALUE - std::abs(axisValue) ) / AXIS_TO_SPEED_SCALE ) );
+        return StepperMotor::MIN_SPEED+(std::ceil(float(JoystickEvent::MAX_AXES_VALUE - std::abs(axisValue))/AXIS_TO_SPEED_SCALE));
     }
     else if(axisValue >= 0)
     {
-        return MIN_SPEED + ( std::ceil( float( MAX_AXIS_VALUE + axisValue) / AXIS_TO_SPEED_SCALE ) );
+        return StepperMotor::MIN_SPEED+(std::ceil(float(JoystickEvent::MAX_AXES_VALUE+axisValue)/ AXIS_TO_SPEED_SCALE));
     }
     else
     {
@@ -104,7 +114,7 @@ U16 Gamepad::axisToSpeed(const S16 &axisValue)
 
 S8 Gamepad::axisToDegrees(const S16 &axisValue)
 {
-    return  S8( axisValue / AXIS_TO_DEEGRES_SCALE );
+    return  S8(axisValue/AXIS_TO_ANGLE_SCALE);
 }
 
 void Gamepad::readGamepadInput()
