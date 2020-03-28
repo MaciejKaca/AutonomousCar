@@ -23,6 +23,9 @@ enum ExitReason
 const S8 LIGHTS_AND_SERVO_PORT_BASE[] = "ttyUSB0";
 const S8 LIGHTS_AND_SERVO_PORT_BACKUP[] = "ttyUSB1";
 
+const bool BUTTON_DOWN = true;
+const bool BUTTON_UP = false;
+
 enum StepperMotorCommand
 {
     RUN = 0,
@@ -35,4 +38,20 @@ enum StepperMotorDirection
 {
     FORWARD = 0,
     BACKWARD = 1
+};
+
+enum ButtonID
+{
+    EXIT_BUTTON = 7,
+    X_BUTTON = 2,
+    RIGHT_BUMPER = 5,
+    LEFT_BUMPER = 4,
+    };
+
+enum AxisID
+{
+    LEFT_X_AXIS = 0,
+    RIGHT_TRIGGER = 4,
+    LEFT_TRIGGER = 5,
+    ARROW_Y_AXIS = 7
 };

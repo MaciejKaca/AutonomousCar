@@ -4,9 +4,10 @@
 #include <gmock/gmock-matchers.h>
 #include <stdlib.h>
 
+#include <CarInterface/interface.h>
 #include <Mocks/SerialPortMock.h>
-#include <inc/lights.h>
 #include <inc/common.h>
+#include <inc/lights.h>
 
 using ::testing::Return;
 using ::testing::_;
@@ -14,6 +15,7 @@ using ::testing::_;
 
 TEST(LightsTest, set)
 {
+    qInfo("LightsTest, set\n");
     SerialPortMock *serialPort = new SerialPortMock();
 
     EXPECT_CALL(*serialPort, send(_, _))
@@ -54,6 +56,7 @@ TEST(LightsTest, set)
 
 TEST(LightsTest, defaultBrakeLightOff)
 {
+    qInfo("LightsTest, defaultBrakeLightOff\n");
     SerialPortMock *serialPort = new SerialPortMock();
 
     EXPECT_CALL(*serialPort, send(_, _))

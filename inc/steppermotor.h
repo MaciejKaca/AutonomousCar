@@ -34,5 +34,4 @@ class StepperMotor : StepperMotorBase
         const U8 STEPPER_ENABLE_PIN = 27;
         const U8 STEPPER_STEP_PIN = 29;
         const U8 STEPPER_DIRECTION_PIN = 28;
-
 };

@@ -1,12 +1,12 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <inc/servo.h>
+#include <inc/Base/ServoBase.h>
 
-class ServoMock : public Servo
+class ServoMock : public ServoBase
 {
 public:
-    MOCK_METHOD(void, turn, (const S8 &_angle));
-    MOCK_METHOD(void, setNewCenter, (const S8 &_angle));
-    MOCK_METHOD(S8, getAngle, ());
+    MOCK_METHOD(void, turn, (const S8 &_angle), (override));
+    MOCK_METHOD(void, setNewCenter, (const S8 &_angle), (override));
+    MOCK_METHOD(S8&, getAngle, (), (override));
 };

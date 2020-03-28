@@ -7,7 +7,6 @@ CONFIG -= app_bundle
 HEADERS += \
         $$PWD/Mocks/** \
         $$PWD/Suites/** \
-
 SOURCES += \
         main.cpp \
         $$PWD/../joystick/joystick.cc \

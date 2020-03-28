@@ -1,7 +1,12 @@
 #include <Suites/LightsTest.h>
+#include <Suites/ServoTest.h>
+#include <Suites/StepperMotorTest.h>
+#include <Suites/GamepadTest.h>
 
 #include <gtest/gtest.h>
 #include <inc/logutils.h>
+
+#define TEST
 
 int main(int argc, char *argv[])
 {

@@ -27,22 +27,6 @@ class Gamepad : GamepadBase
         Servo *servo;
         Lights *lights;
 
-        enum ButtonID
-        {
-            EXIT_BUTTON = 7,
-            X_BUTTON = 2,
-            RIGHT_BUMPER = 5,
-            LEFT_BUMPER = 4,
-        };
-
-        enum AxisID
-        {
-            LEFT_X_AXIS = 0,
-            RIGHT_TRIGGER = 4,
-            LEFT_TRIGGER = 5,
-            ARROW_Y_AXIS = 7
-        };
-
         void clearInput();
         bool isGamepadConnected();
         const std::string gamepadPath = "/dev/input/js0";
@@ -64,8 +48,6 @@ class Gamepad : GamepadBase
         const S16 AXIS_MIN_TRIGGER_POSITION;
 
         const U8 GAMEPAD_REFRESH_TIME = 1;
-        const bool BUTTON_DOWN = true;
-        const bool BUTTON_UP = false;
         const U8 NUMBER_OF_BUTTONS = 10;
         const U8 NUMBER_OF_AXIS = 7;
 };

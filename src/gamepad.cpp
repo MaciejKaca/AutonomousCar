@@ -114,7 +114,7 @@ U16 Gamepad::axisToSpeed(const S16 &axisValue)
 
 S8 Gamepad::axisToDegrees(const S16 &axisValue)
 {
-    return  S8(axisValue/AXIS_TO_ANGLE_SCALE);
+    return  S8(ceil(axisValue/AXIS_TO_ANGLE_SCALE));
 }
 
 void Gamepad::readGamepadInput()
