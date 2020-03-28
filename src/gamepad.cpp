@@ -169,7 +169,7 @@ void Gamepad::handleInput(const ButtonID &buttonID)
             if(isButtonPressed(buttonID))
             {
                 qInfo("Exit Pressed");
-                stepperMotor->swithOff();
+                stepperMotor->switchOff();
                 exit(EXIT_BY_BUTTON);
             }
             break;
@@ -183,7 +183,7 @@ void Gamepad::handleInput(const ButtonID &buttonID)
             else
             {
                 lights->setBrakeLights(BRAKE_LIGHT_OFF);
-                stepperMotor->swithOff();
+                stepperMotor->switchOff();
             }
             break;
 
@@ -256,7 +256,7 @@ void Gamepad::handleInput(const AxisID &axisID)
                     {
                         if(stepperMotor->getSpeed() != 0)
                         {
-                            stepperMotor->swithOff();
+                            stepperMotor->switchOff();
                         }
                     }
             }
@@ -284,7 +284,7 @@ void Gamepad::handleInput(const AxisID &axisID)
 
                         if(stepperMotor->getSpeed() != 0)
                         {
-                            stepperMotor->swithOff();
+                            stepperMotor->switchOff();
                         }
                     }
             }

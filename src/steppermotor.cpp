@@ -32,14 +32,20 @@ StepperMotor::StepperMotor()
 
     threadStatus = false;
     speed = 0;
-    delay = 0;
 }
 
-bool StepperMotor::validateSpeed(const U16 &speed)
+StepperMotor::~StepperMotor()
 {
-    if(speed > MAX_SPEED || speed < MIN_SPEED)
+    qInfo() << "in StepperMotor destructor called";
+    switchOff();
+    checkAndStopThread();
+}
+
+bool StepperMotor::validateSpeed(const U16 &_speed)
+{
+    if(_speed > MAX_SPEED || _speed < MIN_SPEED)
     {
-        qWarning() << "in StepperMotor::validateSpeed(): speed out of range = " << speed;
+        qWarning() << "in StepperMotor::validateSpeed(): speed out of range = " << _speed;
         return false;
     }
     else
@@ -48,15 +54,15 @@ bool StepperMotor::validateSpeed(const U16 &speed)
     }
 }
 
-bool StepperMotor::makeStep(const StepperMotorDirection direction,  U16 speed)
+bool StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _speed)
 {
-    delay = MAX_DELAY - speed*((MAX_DELAY-MIN_DELAY)/(MAX_SPEED-MIN_SPEED));
+    U16 delay = MAX_DELAY - _speed*((MAX_DELAY-MIN_DELAY)/(MAX_SPEED-MIN_SPEED));
 
-    if(direction == FORWARD)
+    if(_direction == FORWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
     }
-    else if(direction == BACKWARD)
+    else if(_direction == BACKWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
@@ -79,17 +85,16 @@ void StepperMotor::brake()
     digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
-void StepperMotor::swithOff()
+void StepperMotor::switchOff()
 {
     checkAndStopThread();
-    qInfo("in StepperMotor::swithOff(): swith off stepper");
+    qInfo("in StepperMotor::swithOff(): switchOff off stepper");
+    speed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
 void StepperMotor::constantMovement()
 {
-    threadStatus = true;
-
     while(threadStatus == true)
     {
         makeStep(direction, speed);
@@ -113,22 +118,14 @@ void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _spee
         speed = _speed;
         direction = _direction;
 
-        if( speed > MIN_SPEED)
+        if(threadStatus == false)
         {
-            if(threadStatus == false)
-            {
-                qInfo("in StepperMotor::move(): launching thread for constantMovement");
-                stepperThread = std::thread(&StepperMotor::constantMovement, this);
-            }
-        }
-        else
-        {
-            qInfo("in StepperMotor::move(): switching off motor");
-            swithOff();
+            threadStatus = true;
+            qInfo("in StepperMotor::move(): launching thread for constantMovement");
+            stepperThread = std::thread(&StepperMotor::constantMovement, this);
         }
     }
 }
-
 
 const bool &StepperMotor::isThreadActive()
 {

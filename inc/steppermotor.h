@@ -9,10 +9,11 @@ class StepperMotor : StepperMotorBase
 {
     public:
         StepperMotor();
-        void move(const StepperMotorDirection direction, const U16 speed) override;
+        ~StepperMotor();
+        void move(const StepperMotorDirection direction, const U16 _speed) override;
         void brake() override;
-        void swithOff() override;
-        bool makeStep(const StepperMotorDirection direction,  U16 speed) override;
+        void switchOff() override;
+        bool makeStep(const StepperMotorDirection direction, const U16 _speed) override;
         const bool &isThreadActive() override;
         const U16 &getSpeed() override;
         const StepperMotorDirection &getDirection() override;
@@ -21,9 +22,8 @@ class StepperMotor : StepperMotorBase
 
     private:
         U16 speed;
-        U16 delay;
         StepperMotorDirection direction;
-        bool validateSpeed(const U16 &speed);
+        bool validateSpeed(const U16 &_speed);
         std::thread stepperThread;
         void checkAndStopThread();
         void constantMovement();

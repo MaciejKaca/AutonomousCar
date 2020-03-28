@@ -8,8 +8,15 @@
 #include <QFileInfoList>
 #include <iostream>
 
+#ifdef TEST
+#define TEST_STATUS true
+#else
+#define TEST_STATUS false
+#endif
+
 namespace LOGUTILS
 {
+  static const bool IS_TEST = TEST_STATUS;
   static QString logFileName;
 
   void initLogFileName()
@@ -111,7 +118,7 @@ namespace LOGUTILS
         logType = "[Uknown]";
         break;
     }
-    if(type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg)
+    if((type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) && IS_TEST)
     {
         std::cout << logType.toStdString() << txt.toStdString() << std::endl;
     }
