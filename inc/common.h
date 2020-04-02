@@ -44,6 +44,7 @@ enum ButtonID
 {
     EXIT_BUTTON = 7,
     X_BUTTON = 2,
+    A_BUTTON = 0,
     RIGHT_BUMPER = 5,
     LEFT_BUMPER = 4,
     };

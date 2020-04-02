@@ -8,6 +8,7 @@
 #include <thread>
 #include <future>
 #include <QDebug>
+#include <cmath>
 
 StepperMotor::StepperMotor()
 {
@@ -32,6 +33,7 @@ StepperMotor::StepperMotor()
 
     threadStatus = false;
     speed = 0;
+    desiredSpeed = 0;
 }
 
 StepperMotor::~StepperMotor()
@@ -43,7 +45,7 @@ StepperMotor::~StepperMotor()
 
 bool StepperMotor::validateSpeed(const U16 &_speed)
 {
-    if(_speed > MAX_SPEED || _speed < MIN_SPEED)
+    if(_speed > MAX_SPEED || _speed <= MIN_SPEED)
     {
         qWarning() << "in StepperMotor::validateSpeed(): speed out of range = " << _speed;
         return false;
@@ -82,6 +84,7 @@ void StepperMotor::brake()
     checkAndStopThread();
     qInfo("in StepperMotor::brake(): braking");
     speed = 0;
+    desiredSpeed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
@@ -90,6 +93,7 @@ void StepperMotor::switchOff()
     checkAndStopThread();
     qInfo("in StepperMotor::swithOff(): switchOff off stepper");
     speed = 0;
+    desiredSpeed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
@@ -97,6 +101,7 @@ void StepperMotor::constantMovement()
 {
     while(threadStatus == true)
     {
+        acceleration();
         makeStep(direction, speed);
     }
 }
@@ -115,7 +120,7 @@ void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _spee
 {
     if(validateSpeed(_speed))
     {
-        speed = _speed;
+        desiredSpeed = _speed;
         direction = _direction;
 
         if(threadStatus == false)
@@ -140,4 +145,23 @@ const U16 &StepperMotor::getSpeed()
 const StepperMotorDirection &StepperMotor::getDirection()
 {
     return direction;
+}
+
+void StepperMotor::acceleration()
+{
+    static U16 stepNumber = 2;
+    if(speed == 0)
+    {
+        stepNumber = 2;
+    }
+    if(speed < desiredSpeed)
+    {
+        ++stepNumber;
+        speed = ceil(log(stepNumber)*ACCELERATION);
+    }
+    else if(speed > desiredSpeed)
+    {
+        stepNumber--;
+        speed = floor(log(stepNumber)*ACCELERATION);
+    }
 }

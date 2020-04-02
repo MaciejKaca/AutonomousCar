@@ -28,9 +28,11 @@ class StepperMotor : StepperMotorBase
         void checkAndStopThread();
         void constantMovement();
         bool threadStatus;
-
+        void acceleration();
+        U16 desiredSpeed;
         const U16 MAX_DELAY = 2000;
-        const U16 MIN_DELAY = 300;
+        const U16 MIN_DELAY = 400;
+        const float ACCELERATION = 12.5;
         const U8 STEPPER_ENABLE_PIN = 27;
         const U8 STEPPER_STEP_PIN = 29;
         const U8 STEPPER_DIRECTION_PIN = 28;

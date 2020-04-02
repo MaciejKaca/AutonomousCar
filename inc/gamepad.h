@@ -17,7 +17,6 @@ class Gamepad : GamepadBase
 
     public:
         Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights);
-        Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick);
         void readGamepadInput() override;
         ~Gamepad();
 

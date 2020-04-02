@@ -44,30 +44,6 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     axisState[AxisID::RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
 }
 
-Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights, Joystick *_joystick):
-      AXIS_TO_SPEED_SCALE(float(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
-                          float(_stepperMotor->MAX_SPEED - StepperMotor::MIN_SPEED)),
-      AXIS_TO_ANGLE_SCALE(float(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
-                            float(std::abs(servo->MIN_ANGLE)+servo->MAX_ANGLE)),
-      AXIS_MIN_TRIGGER_POSITION(JoystickEvent::MIN_AXES_VALUE + static_cast<S16>(AXIS_TO_SPEED_SCALE))
-{
-    qInfo("in Gamepad, initializing constructor");
-    joystick = _joystick;
-    if (!joystick->isFound())
-    {
-        qCritical("in Gamepad::Gamepad, joystick not found");
-        exit(EXIT_BY_MISSING_GAMEPAD);
-    }
-    else
-    {
-        qInfo("in Gamepad::Gamepad, joystick found");
-    }
-
-    stepperMotor = _stepperMotor;
-    servo = _servo;
-    lights = _lights;
-}
-
 Gamepad::~Gamepad()
 {
     qInfo("in Gamepad::~Gamepad, destructor called");

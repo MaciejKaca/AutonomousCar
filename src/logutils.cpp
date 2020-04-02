@@ -118,7 +118,7 @@ namespace LOGUTILS
         logType = "[Uknown]";
         break;
     }
-    if((type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) && IS_TEST)
+    if((type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) || IS_TEST)
     {
         std::cout << logType.toStdString() << txt.toStdString() << std::endl;
     }

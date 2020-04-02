@@ -19,4 +19,13 @@ TEST(StepperMotorTest, move)
     ASSERT_TRUE(stepperMotor.isThreadActive());
     EXPECT_EQ(stepperMotor.getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor.getDirection(), expectedDirection);
+    stepperMotor.switchOff();
+
+    expectedSpeed = StepperMotor::MAX_SPEED;
+    expectedDirection = BACKWARD;
+    stepperMotor.move(expectedDirection, expectedSpeed);
+    ASSERT_TRUE(stepperMotor.isThreadActive());
+    EXPECT_EQ(stepperMotor.getSpeed(), expectedSpeed);
+    EXPECT_EQ(stepperMotor.getDirection(), expectedDirection);
+    stepperMotor.switchOff();
 }
