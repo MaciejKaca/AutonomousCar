@@ -42,11 +42,11 @@ enum StepperMotorDirection
 
 enum ButtonID
 {
-    EXIT_BUTTON = 7,
-    X_BUTTON = 2,
+    EXIT_BUTTON = 11,
+    X_BUTTON = 3,
     A_BUTTON = 0,
-    RIGHT_BUMPER = 5,
-    LEFT_BUMPER = 4,
+    RIGHT_BUMPER = 7,
+    LEFT_BUMPER = 6
     };
 
 enum AxisID

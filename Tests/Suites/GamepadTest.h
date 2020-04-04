@@ -64,11 +64,10 @@ TEST(GamepadTest, Brake)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
     ASSERT_TRUE(lights->getBrakeLightsStatus() == BRAKE_LIGHT_OFF);
 
     ButtonID testedButton = X_BUTTON;
@@ -87,9 +86,11 @@ TEST(GamepadTest, Brake)
     gamepadTest.handleInput(testedButton);
     ASSERT_TRUE(lights->getBrakeLightsStatus() == expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -97,11 +98,10 @@ TEST(GamepadTest, LeftTurnSignal)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
 
     ButtonID testedButton = LEFT_BUMPER;
     bool buttonState = BUTTON_DOWN;
@@ -117,9 +117,11 @@ TEST(GamepadTest, LeftTurnSignal)
     gamepadTest.handleInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -127,11 +129,10 @@ TEST(GamepadTest, RightTurnSignal)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
 
     ButtonID testedButton = RIGHT_BUMPER;
     bool buttonState = BUTTON_DOWN;
@@ -147,9 +148,11 @@ TEST(GamepadTest, RightTurnSignal)
     gamepadTest.handleInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -157,11 +160,10 @@ TEST(GamepadTest, HazardLights)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
 
     /*
      * First pressed button Right bumper
@@ -211,9 +213,11 @@ TEST(GamepadTest, HazardLights)
     gamepadTest.handleInput(testedButton);
     ASSERT_TRUE(lights->getTurnSignalStatus() == expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -221,11 +225,10 @@ TEST(GamepadTest, Headlights)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
 
     HeadLightCommand expectedState = HEADLIGHT_OFF;
     S16 AxisValue = JoystickEvent::MIN_AXES_VALUE;
@@ -245,9 +248,11 @@ TEST(GamepadTest, Headlights)
     gamepadTest.handleInput(testedAxis);
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -255,11 +260,10 @@ TEST(GamepadTest, BrakeLights)
 {
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
-    Servo *servo = (Servo*)malloc(sizeof(Servo));
+    ServoMock *servo = new ServoMock();
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
-    GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, lights);
+    GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
 
     BrakeLightsCommand expectedState = BRAKE_LIGHT_OFF;
     S16 AxisValue = JoystickEvent::MAX_AXES_VALUE;
@@ -275,9 +279,11 @@ TEST(GamepadTest, BrakeLights)
     gamepadTest.handleInput(testedAxis);
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedState);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -286,8 +292,7 @@ TEST(GamepadTest, Turn)
     StepperMotorMock *stepperMotor = new StepperMotorMock();
     SerialPortMock *serialPort = new SerialPortMock();
     LightsMock *lights = new LightsMock();
-    EXPECT_CALL(*serialPort, send(_, _))
-        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Servo *servo = new Servo((SerialPort*)serialPort);
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, (Lights*)lights);
 
@@ -310,9 +315,11 @@ TEST(GamepadTest, Turn)
     gamepadTest.handleInput(testedAxis);
     EXPECT_EQ(servo->getAngle(), expectedAngle);
 
-    delete serialPort;
-    delete servo;
+    bool serialState = false;
+    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -350,9 +357,9 @@ TEST(GamepadTest, ForwardMovement)
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
-    delete serialPort;
-    delete servo;
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -401,9 +408,9 @@ TEST(GamepadTest, BackwardMovement)
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
-    delete serialPort;
-    delete servo;
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }
 
@@ -455,8 +462,8 @@ TEST(GamepadTest, BothTrigersAtOnce)
     gamepadTest.handleInput(X_BUTTON);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
-    delete serialPort;
-    delete servo;
     delete lights;
+    delete servo;
+    delete serialPort;
     delete stepperMotor;
 }

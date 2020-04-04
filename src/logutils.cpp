@@ -8,15 +8,8 @@
 #include <QFileInfoList>
 #include <iostream>
 
-#ifdef TEST_SUITES
-#define TEST_STATUS true
-#else
-#define TEST_STATUS false
-#endif
-
 namespace LOGUTILS
 {
-  static const bool IS_TEST = TEST_STATUS;
   static QString logFileName;
 
   void initLogFileName()
@@ -51,8 +44,10 @@ namespace LOGUTILS
     }
   }
 
-  bool initLogging()
+  bool initLogging(bool suppressWarnings)
   {
+      SUPPRESS_WARNINGS = suppressWarnings;
+
       // Create folder for logfiles if not exists
       if(!QDir(logFolderName).exists())
       {
@@ -118,7 +113,7 @@ namespace LOGUTILS
         logType = "[Uknown]";
         break;
     }
-    if((type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) || IS_TEST)
+    if((type == QtWarningMsg || type == QtCriticalMsg || type == QtFatalMsg) && !SUPPRESS_WARNINGS)
     {
         std::cout << logType.toStdString() << txt.toStdString() << std::endl;
     }

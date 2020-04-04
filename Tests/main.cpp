@@ -6,11 +6,9 @@
 #include <gtest/gtest.h>
 #include <inc/logutils.h>
 
-#define TEST
-
 int main(int argc, char *argv[])
 {
-    LOGUTILS::initLogging();
+    LOGUTILS::initLogging(true);
 
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

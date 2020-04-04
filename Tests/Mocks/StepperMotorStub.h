@@ -47,7 +47,8 @@ bool StepperMotorStub::makeStep(const StepperMotorDirection _direction, const U1
 }
 
 const bool &StepperMotorStub::isThreadActive()
-{}
+{
+}
 
 const U16 &StepperMotorStub::getSpeed()
 {

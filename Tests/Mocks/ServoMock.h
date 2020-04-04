@@ -8,5 +8,5 @@ class ServoMock : public ServoBase
 public:
     MOCK_METHOD(void, turn, (const S8 &_angle), (override));
     MOCK_METHOD(void, setNewCenter, (const S8 &_angle), (override));
-    MOCK_METHOD(S8&, getAngle, (), (override));
+    MOCK_METHOD(const S8&, getAngle, (), (override));
 };

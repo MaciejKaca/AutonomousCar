@@ -8,7 +8,7 @@
 
 int main()
 {
-    LOGUTILS::initLogging();
+    LOGUTILS::initLogging(true);
 
     SerialPort* lightsAndServoSerial;
     Servo* servo;
