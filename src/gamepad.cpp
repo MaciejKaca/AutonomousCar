@@ -22,7 +22,7 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     if (!joystick->isFound())
     {
         qCritical("in Gamepad::Gamepad, joystick not found");
-        exit(EXIT_BY_MISSING_GAMEPAD);
+        throw EXIT_BY_MISSING_GAMEPAD;
     }
     else
     {
@@ -42,12 +42,38 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     axisState[AxisID::ARROW_Y_AXIS] = 0;
     axisState[AxisID::LEFT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
     axisState[AxisID::RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
+
+    isThreadActive = false;;
 }
 
 Gamepad::~Gamepad()
 {
     qInfo("in Gamepad::~Gamepad, destructor called");
     delete joystick;
+}
+
+GamepadBase::~GamepadBase(){}
+
+void Gamepad::startThread()
+{
+    qInfo("in Gamepad::startThread, starting thread");
+    gamepadThread = std::async(std::launch::async, &Gamepad::readGamepadInput, this);
+}
+
+void Gamepad::stopThread()
+{
+    qInfo("in Gamepad::stopThread, terminating thread");
+    if(isThreadActive == true)
+    {
+        isThreadActive = false;
+        gamepadThread.get();
+    }
+}
+
+void Gamepad::waitForExitButton()
+{
+    qInfo("in Gamepad::waitForExitButton, waiting for exit");
+    gamepadThread.get();
 }
 
 void Gamepad::clearInput()
@@ -93,16 +119,17 @@ S8 Gamepad::axisToDegrees(const S16 &axisValue)
     return  S8(ceil(axisValue/AXIS_TO_ANGLE_SCALE));
 }
 
-void Gamepad::readGamepadInput()
+bool Gamepad::readGamepadInput()
 {
     clearInput();
+    isThreadActive = true;
 
-    while(true)
+    while(isThreadActive)
     {
         if (!isGamepadConnected())
         {
             qCritical( "Gamepad disconnected");
-            exit(EXIT_BY_MISSING_GAMEPAD);
+            throw EXIT_BY_MISSING_GAMEPAD;
         }
 
         JoystickEvent event;
@@ -125,6 +152,8 @@ void Gamepad::readGamepadInput()
             }
         }
     }
+
+    return true;
 }
 
 const bool &Gamepad::isButtonPressed(const ButtonID &buttonID)
@@ -144,9 +173,8 @@ void Gamepad::handleInput(const ButtonID &buttonID)
         case EXIT_BUTTON:
             if(isButtonPressed(buttonID))
             {
-                qInfo("Exit Pressed");
-                stepperMotor->switchOff();
-                exit(EXIT_BY_BUTTON);
+                qInfo("in Gamepad::handleInput, exit pressed");
+                isThreadActive = false;
             }
             break;
 

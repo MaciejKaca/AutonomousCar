@@ -8,6 +8,7 @@ class Servo : ServoBase
 {
 public:
     Servo(SerialPort * _serialPort);
+    ~Servo();
     void turn(const S8 &_angle) override;
     void setNewCenter(const S8 &_angle) override;
     const S8 &getAngle() override;

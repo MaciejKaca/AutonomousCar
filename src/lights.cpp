@@ -15,6 +15,20 @@ Lights::Lights(SerialPort * _serialPort) : serialPort(_serialPort)
     this->setReverseLight(reverseLightStatus);
 }
 
+Lights::~Lights()
+{
+    qInfo("in Lights::~Lights, destructor called");
+    if(serialPort->isSerialOpen())
+    {
+        this->setTurnSignal(TURN_SIGNAL_OFF);
+        this->setHeadLight(HEADLIGHT_OFF);
+        this->setBrakeLights(BRAKE_LIGHT_OFF);
+        this->setReverseLight(REVERSE_LIGHT_OFF);
+    }
+}
+
+LightsBase::~LightsBase(){}
+
 const BrakeLightsCommand &Lights::getBrakeLightsStatus()
 {
     return brakeLightsStatus;

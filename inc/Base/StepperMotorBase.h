@@ -12,4 +12,5 @@ class StepperMotorBase
         virtual const bool &isThreadActive() = 0;
         virtual const U16 &getSpeed() = 0;
         virtual const StepperMotorDirection &getDirection() = 0;
+        virtual ~StepperMotorBase() = 0;
 };

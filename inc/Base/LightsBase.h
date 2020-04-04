@@ -18,4 +18,6 @@ public:
     virtual void setBrakeLights(const BrakeLightsCommand &command) = 0;
     virtual void setBrakeLightsWhenOff(const BrakeLightsCommand &command) = 0;
     virtual void setReverseLight(const ReverseLightCommand &command) = 0;
+
+    virtual ~LightsBase() = 0;
 };

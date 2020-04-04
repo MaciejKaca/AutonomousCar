@@ -8,6 +8,17 @@ Servo::Servo(SerialPort * _serialPort) : serialPort(_serialPort)
 }
 
 
+Servo::~Servo()
+{
+    qInfo("in Servo::~Servo, destructor called");
+    if(serialPort->isSerialOpen())
+    {
+        this->turn(0);
+    }
+}
+
+ServoBase::~ServoBase(){}
+
 const S8 &Servo::getAngle()
 {
     return angle;
@@ -23,8 +34,6 @@ void Servo::turn(const S8 &_angle)
         message.device = SERVO;
         message.servoInfo.command = TURN;
         message.servoInfo.degrees = angle;
-
-        qInfo() << "in Servo::turn(): turning servo " << angle << "degrees";
 
         serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
     }
@@ -57,7 +66,6 @@ bool Servo::validateAngle(const S8 _angle)
 {
     if(MIN_ANGLE<=_angle && _angle<=MAX_ANGLE)
     {
-        qInfo() << "in Servo::validateAngle(): Angle valid = " << _angle;
         return true;
     }
     else

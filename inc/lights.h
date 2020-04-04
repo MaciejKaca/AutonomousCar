@@ -9,6 +9,7 @@ class Lights : LightsBase
 
 public:
     Lights(SerialPort *_serialPort);
+    ~Lights();
     const TurnSignalCommand &getTurnSignalStatus() override;
     const HeadLightCommand &getHeadLightStatus() override;
     const BrakeLightsCommand &getBrakeLightsStatus() override;

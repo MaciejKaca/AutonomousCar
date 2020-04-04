@@ -16,7 +16,7 @@ StepperMotor::StepperMotor()
     if(wiringPiSetup() < 0)
     {
         qCritical("in StepperMotor::StepperMotor(): Failed to launch wiringPi");
-        exit(EXIT_BY_FAILED_GPIO);
+        throw EXIT_BY_FAILED_GPIO;
     }
     else
     {
@@ -36,11 +36,12 @@ StepperMotor::StepperMotor()
     desiredSpeed = 0;
 }
 
+StepperMotorBase::~StepperMotorBase(){}
+
 StepperMotor::~StepperMotor()
 {
-    qInfo() << "in StepperMotor destructor called";
+    qInfo() << "in StepperMotor::~StepperMotor, destructor called";
     switchOff();
-    checkAndStopThread();
 }
 
 bool StepperMotor::validateSpeed(const U16 &_speed)
@@ -91,7 +92,7 @@ void StepperMotor::brake()
 void StepperMotor::switchOff()
 {
     checkAndStopThread();
-    qInfo("in StepperMotor::swithOff(): switchOff off stepper");
+    qInfo("in StepperMotor::switchOff(): switchOff off stepper");
     speed = 0;
     desiredSpeed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, LOW);

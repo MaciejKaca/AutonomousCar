@@ -8,7 +8,7 @@
 #include <QFileInfoList>
 #include <iostream>
 
-#ifdef TEST
+#ifdef TEST_SUITES
 #define TEST_STATUS true
 #else
 #define TEST_STATUS false

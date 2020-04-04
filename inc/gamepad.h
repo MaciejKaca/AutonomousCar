@@ -4,10 +4,11 @@
 #include <inc/steppermotor.h>
 #include <inc/servo.h>
 #include <inc/lights.h>
-
 #include <joystick/joystick.hh>
+
 #include <unistd.h>
 #include <map>
+#include <future>
 
 #include "Base/GamepadBase.h"
 
@@ -17,7 +18,10 @@ class Gamepad : GamepadBase
 
     public:
         Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights);
-        void readGamepadInput() override;
+        void startThread();
+        void stopThread();
+        void waitForExitButton();
+        bool readGamepadInput() override;
         ~Gamepad();
 
     private:
@@ -49,4 +53,7 @@ class Gamepad : GamepadBase
         const U8 GAMEPAD_REFRESH_TIME = 1;
         const U8 NUMBER_OF_BUTTONS = 10;
         const U8 NUMBER_OF_AXIS = 7;
+
+        std::future<bool> gamepadThread;
+        bool isThreadActive;
 };

@@ -5,6 +5,8 @@
 class SerialPortBase
 {
 public:
-    virtual bool send(U8 *buffer,const S16 &size) = 0;
+    virtual void send(U8 *buffer,const S16 &size) = 0;
     virtual void read(U8 *buffer,const S16 &size) = 0;
+    virtual const bool &isSerialOpen() = 0;
+    virtual ~SerialPortBase() = 0;
 };
