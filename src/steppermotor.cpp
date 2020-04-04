@@ -154,7 +154,7 @@ void StepperMotor::acceleration()
     if(desiredSpeed >= minimumAccelerationSpeed ||
         speed > minimumAccelerationSpeed)
     {
-        if(speed == 0)
+        if(speed < minimumAccelerationSpeed)
         {
             stepNumber = 0;
         }
