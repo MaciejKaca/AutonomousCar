@@ -43,7 +43,7 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     axisState[AxisID::LEFT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
     axisState[AxisID::RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
 
-    isThreadActive = false;;
+    isThreadActive = false;
 }
 
 Gamepad::~Gamepad()

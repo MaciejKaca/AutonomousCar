@@ -3,9 +3,10 @@
 Lights::Lights(SerialPort * _serialPort) : serialPort(_serialPort)
 {
     qInfo("in Lights, initializing constructor");
-    brakeLightsWhenOffStatus = BRAKE_LIGHT_OFF;
+
+    brakeLightsWhenOffStatus = BRAKE_LIGHT_DAYTIME;
     turnSignalStatus = TURN_SIGNAL_OFF;
-    headLightStatus = HEADLIGHT_OFF;
+    headLightStatus = HEADLIGHT_DAYTIME;
     brakeLightsStatus = BRAKE_LIGHT_OFF;
     reverseLightStatus = REVERSE_LIGHT_OFF;
 
@@ -20,6 +21,7 @@ Lights::~Lights()
     qInfo("in Lights::~Lights, destructor called");
     if(serialPort->isSerialOpen())
     {
+        this->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
         this->setTurnSignal(TURN_SIGNAL_OFF);
         this->setHeadLight(HEADLIGHT_OFF);
         this->setBrakeLights(BRAKE_LIGHT_OFF);
