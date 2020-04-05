@@ -68,6 +68,7 @@ TEST(GamepadTest, Brake)
     EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
     Lights *lights = new Lights((SerialPort*)serialPort);
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, lights);
+    lights->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
     ASSERT_TRUE(lights->getBrakeLightsStatus() == BRAKE_LIGHT_OFF);
 
     ButtonID testedButton = X_BUTTON;
@@ -234,6 +235,7 @@ TEST(GamepadTest, Headlights)
     S16 AxisValue = JoystickEvent::MIN_AXES_VALUE;
     AxisID testedAxis = ARROW_Y_AXIS;
     gamepadTest.setAxis(testedAxis, AxisValue);
+    lights->setHeadLight(expectedState);
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
     expectedState = HEADLIGHT_DAYTIME;
@@ -269,6 +271,7 @@ TEST(GamepadTest, BrakeLights)
     S16 AxisValue = JoystickEvent::MAX_AXES_VALUE;
     AxisID testedAxis = ARROW_Y_AXIS;
     gamepadTest.setAxis(testedAxis, AxisValue);
+    lights->setBrakeLightsWhenOff(expectedState);
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedState);
 
     expectedState = BRAKE_LIGHT_DAYTIME;

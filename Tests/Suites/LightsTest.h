@@ -18,8 +18,10 @@ TEST(LightsTest, set)
     qInfo("LightsTest, set\n");
     SerialPortMock *serialPort = new SerialPortMock();
 
-    EXPECT_CALL(*serialPort, send(_, _)).Times(4);
+    EXPECT_CALL(*serialPort, send(_, _)).Times(6);
     Lights *lights = new Lights((SerialPort*)serialPort);
+    lights->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
+    lights->setHeadLight(HEADLIGHT_OFF);
     EXPECT_EQ(lights->getTurnSignalStatus(), TURN_SIGNAL_OFF);
     EXPECT_EQ(lights->getHeadLightStatus(), HEADLIGHT_OFF);
     EXPECT_EQ(lights->getBrakeLightsStatus(), BRAKE_LIGHT_OFF);
@@ -56,9 +58,9 @@ TEST(LightsTest, defaultBrakeLightOff)
     qInfo("LightsTest, defaultBrakeLightOff\n");
     SerialPortMock *serialPort = new SerialPortMock();
 
-    EXPECT_CALL(*serialPort, send(_, _)).Times(4);
+    EXPECT_CALL(*serialPort, send(_, _)).Times(5);
     Lights *lights = new Lights((SerialPort*)serialPort);
-    EXPECT_EQ(lights->getBrakeLightsWhenOffStatus(), BRAKE_LIGHT_OFF);
+    lights->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
     EXPECT_EQ(lights->getBrakeLightsWhenOffStatus(), BRAKE_LIGHT_OFF);
 
     EXPECT_CALL(*serialPort, send(_, _)).Times(1);
