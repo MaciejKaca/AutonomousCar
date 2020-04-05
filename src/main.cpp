@@ -18,20 +18,18 @@ int main()
 
     try
     {
-        lightsAndServoSerial = new SerialPort();
-        servo = new Servo(lightsAndServoSerial);
-        lights = new Lights(lightsAndServoSerial);
         stepperMotor =  new StepperMotor();
+        lightsAndServoSerial = new SerialPort();
+        servo = new Servo(lightsAndServoSerial, stepperMotor);
+        lights = new Lights(lightsAndServoSerial);
         gamepad = new Gamepad(stepperMotor, servo, lights);
     }
     catch(ExitReason excp)
     {
         switch(excp)
         {
-        case EXIT_BY_FAILED_GPIO:
-            delete lights;
-            delete servo;
-            delete lightsAndServoSerial;
+        case EXIT_BY_MISSING_MODULE:
+            delete stepperMotor;
             break;
         case EXIT_BY_MISSING_GAMEPAD:
             delete lights;

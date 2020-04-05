@@ -1,12 +1,14 @@
 #include <inc/servo.h>
+#include <unistd.h>
+#include <thread>
 
-Servo::Servo(SerialPort * _serialPort) : serialPort(_serialPort)
+Servo::Servo(SerialPort* _serialPort, StepperMotor* _stepperMotor) : serialPort(_serialPort), stepperMotor(_stepperMotor)
 {
     qInfo("in Servo, initializing constructor");
     angle = 0;
-    this->turn(angle);
+    cancelCenter = false;
+    centerWheelsThread = std::async(std::launch::async, &Servo::addOffset, this);
 }
-
 
 Servo::~Servo()
 {
@@ -24,18 +26,84 @@ const S8 &Servo::getAngle()
     return angle;
 }
 
+void Servo::addOffset()
+{
+    U8 center = 0;
+    LightsAndServoMsg message;
+    message.device = SERVO;
+    message.servoInfo.command = TURN;
+    if(angle == center)
+    {
+        message.servoInfo.degrees = center;
+        serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
+        angle = center;
+    }
+    else
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_BEFORE_OFFSET));
+        if(!cancelCenter)
+        {
+            if(angle > center) //Turn from right
+            {
+                if(stepperMotor->getSpeed() > 0)
+                {
+                    message.servoInfo.degrees = FROM_RIGHT_OFFSET_MOVING;
+                }
+                else
+                {
+                    message.servoInfo.degrees = FROM_RIGHT_OFFSET_STAND;
+                }
+                serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
+            }
+            else if(angle < center) //Turn from left
+            {
+                if(stepperMotor->getSpeed() > 0)
+                {
+                    message.servoInfo.degrees = FROM_LEFT_OFFSET_MOVING;
+                }
+                else
+                {
+                    message.servoInfo.degrees = FROM_LEFT_OFFSET_STAND;
+                }
+                serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
+            }
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_BEFORE_OFFSET));
+            if(!cancelCenter)
+            {
+                message.servoInfo.degrees = center;
+                serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
+                angle = center;
+            }
+        }
+    }
+}
+
 void Servo::turn(const S8 &_angle)
 {
     if(validateAngle(_angle))
     {
-        angle = _angle;
-
         LightsAndServoMsg message;
         message.device = SERVO;
         message.servoInfo.command = TURN;
-        message.servoInfo.degrees = angle;
-
+        message.servoInfo.degrees = _angle;
         serialPort->send((U8*)&message, sizeof(LightsAndServoMsg));
+
+        if(_angle != 0)
+        {
+            angle = _angle;
+            cancelCenter = true;
+        }
+        else
+        {
+            cancelCenter = false;
+            auto status = centerWheelsThread.wait_for(std::chrono::milliseconds(0));
+            if (status == std::future_status::ready)
+            {
+                centerWheelsThread.get();
+                centerWheelsThread = std::async(std::launch::async, &Servo::addOffset, this);
+            }
+        }
     }
     else
     {

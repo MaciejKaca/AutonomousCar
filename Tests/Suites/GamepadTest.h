@@ -296,7 +296,7 @@ TEST(GamepadTest, Turn)
     SerialPortMock *serialPort = new SerialPortMock();
     LightsMock *lights = new LightsMock();
     EXPECT_CALL(*serialPort, send(_, _)).WillRepeatedly(Return());
-    Servo *servo = new Servo((SerialPort*)serialPort);
+    Servo *servo = new Servo((SerialPort*)serialPort, (StepperMotor*)stepperMotor);
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, servo, (Lights*)lights);
 
     AxisID testedAxis = LEFT_X_AXIS;
@@ -315,7 +315,10 @@ TEST(GamepadTest, Turn)
     axisValue = 0;
     expectedAngle = 0;
     gamepadTest.setAxis(testedAxis, axisValue);
+    U8 speed = 0;
+    EXPECT_CALL(*stepperMotor, getSpeed).WillOnce(ReturnRef(speed));
     gamepadTest.handleInput(testedAxis);
+    usleep(500000);
     EXPECT_EQ(servo->getAngle(), expectedAngle);
 
     bool serialState = false;
