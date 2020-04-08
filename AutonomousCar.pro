@@ -24,6 +24,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+        src/DistanceSensors.cpp \
         src/main.cpp \
         joystick/joystick.cc \
         src/gamepad.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
 
 HEADERS += \
         inc/Base/* \
+        inc/DistanceSensors.h \
         inc/common.h \
         inc/steppermotor.h \
         inc/serialport.h \

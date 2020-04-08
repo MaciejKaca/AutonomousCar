@@ -7,6 +7,10 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <bits/stdc++.h>
+
+typedef uint32_t U32;
+typedef int32_t S32;
 typedef uint16_t U16;
 typedef int16_t S16;
 typedef uint8_t U8;
@@ -55,4 +59,16 @@ enum AxisID
     RIGHT_TRIGGER = 4,
     LEFT_TRIGGER = 5,
     ARROW_Y_AXIS = 7
+};
+
+enum SensorAlignment
+{
+    SENSOR_FRONT = 0,
+    SENSOR_FRONT_LEFT = 1,
+    SENSOR_FRONT_RIGHT = 2,
+    SENSOR_REAR = 3,
+    SENSOR_REAR_LEFT = 4,
+    SENSOR_READ_RIGHT = 5,
+    SENSOR_LEFT_SIDE = 6,
+    SENSOR_RIGHT_SIDE = 7
 };
