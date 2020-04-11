@@ -3,6 +3,7 @@
 #include <inc/servo.h>
 #include <inc/lights.h>
 #include <inc/logutils.h>
+#include <inc/DistanceSensors.h>
 
 #include <future>
 
@@ -15,10 +16,12 @@ int main()
     Lights* lights;
     Gamepad* gamepad;
     StepperMotor* stepperMotor;
+    DistanceSensors *distanceSensors;
 
     try
     {
         stepperMotor =  new StepperMotor();
+        distanceSensors = new DistanceSensors();
         lightsAndServoSerial = new SerialPort();
         servo = new Servo(lightsAndServoSerial, stepperMotor);
         lights = new Lights(lightsAndServoSerial);
@@ -45,6 +48,7 @@ int main()
 
     try
     {
+        distanceSensors->startThread();
         gamepad->startThread();
         gamepad->waitForExitButton();
     }
@@ -67,6 +71,7 @@ int main()
     delete lights;
     delete servo;
     delete lightsAndServoSerial;
+    delete distanceSensors;
     delete stepperMotor;
     delete gamepad;
 

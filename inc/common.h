@@ -68,7 +68,7 @@ enum SensorAlignment
     SENSOR_FRONT_RIGHT = 2,
     SENSOR_REAR = 3,
     SENSOR_REAR_LEFT = 4,
-    SENSOR_READ_RIGHT = 5,
+    SENSOR_REAR_RIGHT = 5,
     SENSOR_LEFT_SIDE = 6,
     SENSOR_RIGHT_SIDE = 7
 };

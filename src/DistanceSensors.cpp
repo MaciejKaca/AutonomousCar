@@ -4,18 +4,24 @@
 #include <chrono>
 #include <iostream>
 
+#define GET_VARIABLE_NAME(Variable) (#Variable)
+
 DistanceSensors::DistanceSensors()
 {
     qInfo("in DistanceSensors, initializing constructor");
     measurements.fill(0);
     terminateThread = false;
-    pinMode(25, INPUT);
-    pinMode(TRIGGER_SENSOR_PIN, OUTPUT);
-    digitalWrite(TRIGGER_SENSOR_PIN, LOW);
+    for(auto sensorPins : DISTANCE_SENSORS_PINS)
+    {
+        pinMode(sensorPins.second.echoPin, INPUT);
+        pinMode(sensorPins.second.triggerPin, OUTPUT);
+        digitalWrite(sensorPins.second.triggerPin, LOW);
+    }
 }
 
 DistanceSensors::~DistanceSensors()
 {
+    qInfo("in DistanceSensors::~DistanceSensors, destructor called");
     stopThread();
 }
 
@@ -29,6 +35,7 @@ const U16 &DistanceSensors::getDistance(const SensorAlignment &sensorAlignment)
 void DistanceSensors::startThread()
 {
     qInfo("in DistanceSensors::startThread, launching thread");
+    terminateThread = false;
     measurementThread = std::async(std::launch::async, &DistanceSensors::collectMeasurements, this);
 }
 
@@ -44,31 +51,32 @@ void DistanceSensors::collectMeasurements()
     qInfo("in DistanceSensors::collectMeasurements, succesfull thread launching");
     while(!terminateThread)
     {
-        for(int i = 0; i < NUMBER_OF_SENSORS; i++)
+        for(auto sensorPins : DISTANCE_SENSORS_PINS)
         {
-            makeMeasurement(i);
+            SensorAlignment sensorAlignment = sensorPins.first;
+            makeMeasurement(sensorAlignment);
         }
     }
+    qInfo("in DistanceSensors::collectMeasurements, thread ended");
 }
 
-void DistanceSensors::makeMeasurement(const U8 &sensorAlignment)
+void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
 {
     U16 measurementsPerSensor[NUMBER_OF_MEASUREMENTS_PER_SENSOR];
     for(int i = 0; i < NUMBER_OF_MEASUREMENTS_PER_SENSOR; i++)
     {
-        trigger();
+        trigger(sensorAlignment);
         U32 duration = pulseIn(sensorAlignment);
         U16 distance = ceil((duration/2)*SOUND_SPEED);
         measurementsPerSensor[i] = distance;
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
-
     measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);
 }
 
-U32 DistanceSensors::pulseIn(const U8 &sensorAlignment)
+U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
 {
-    U8 pin = DISTANCE_SENSORS_PINS[sensorAlignment];
+    U8 pin = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoPin;
 
     auto timeUntilTimeout = std::chrono::high_resolution_clock::now();
     while(digitalRead(pin) == LOW)
@@ -82,13 +90,21 @@ U32 DistanceSensors::pulseIn(const U8 &sensorAlignment)
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    while(digitalRead(pin) == HIGH);
+    while(digitalRead(pin) == HIGH)
+    {
+        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        if(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
+            > SENSOR_TIMEOUT)
+        {
+            return -1;
+        }
+    }
 
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
     return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
 }
 
-U16 DistanceSensors::mostFrequent(U16 array[])
+U16 DistanceSensors::mostFrequent(const U16 array[])
 {
     // Insert all elements in hash.
     std::unordered_map<U16, U8> hashMap;
@@ -99,7 +115,7 @@ U16 DistanceSensors::mostFrequent(U16 array[])
 
     // find the max frequency
     U16 maxCount = 0;
-    U8 mostFrequent = -1;
+    U16 mostFrequent = -1;
     for (auto element : hashMap)
     {
         if (maxCount < element.second)
@@ -111,9 +127,10 @@ U16 DistanceSensors::mostFrequent(U16 array[])
     return mostFrequent;
 }
 
-void DistanceSensors::trigger()
+void DistanceSensors::trigger(const SensorAlignment &sensorAlignment)
 {
-    digitalWrite(TRIGGER_SENSOR_PIN, HIGH);
-    delayMicroseconds(TRIGGER_DELAY);
-    digitalWrite(TRIGGER_SENSOR_PIN, LOW);
+    U8 triggerPin = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.triggerPin;
+    digitalWrite(triggerPin, HIGH);
+    delayMicroseconds(TRIGGER_DURATION);
+    digitalWrite(triggerPin, LOW);
 }
