@@ -77,7 +77,21 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
         trigger(sensorAlignment);
         U32 duration = pulseIn(sensorAlignment);
         U16 distance = ceil((duration/2)*SOUND_SPEED);
-        measurementsPerSensor[i] = distance;
+        if(distance != 0)
+        {
+            measurementsPerSensor[i] = distance;
+        }
+        else
+        {
+            if(measurementsPerSensor[i] <= DISTANCE_THRESHOLD)
+            {
+                measurementsPerSensor[i] = MIN_DISTANCE;
+            }
+            else
+            {
+                measurementsPerSensor[i] = MAX_DISTANCE;
+            }
+        }
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
     measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);

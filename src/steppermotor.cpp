@@ -13,15 +13,6 @@
 StepperMotor::StepperMotor()
 {
     qInfo("in StepperMotor, initializing constructor");
-    if(wiringPiSetup() < 0)
-    {
-        qCritical("in StepperMotor::StepperMotor(): Failed to launch wiringPi");
-        throw EXIT_BY_FAILED_GPIO;
-    }
-    else
-    {
-        qInfo("in StepperMotor::StepperMotor(): Lanuch wiringPi succes");
-    }
 
     pinMode(STEPPER_DIRECTION_PIN, OUTPUT);
     pinMode(STEPPER_ENABLE_PIN, OUTPUT);

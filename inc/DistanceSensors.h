@@ -25,6 +25,9 @@ private:
     const U8 NUMBER_OF_MEASUREMENTS_PER_SENSOR = 10;
     const float SOUND_SPEED = 0.034;
     const U8 COMMON_ECHO = 7;
+    const U8 DISTANCE_THRESHOLD = 15;
+    const U8 MIN_DISTANCE = 0;
+    const U16 MAX_DISTANCE = 400;
     static const U8 NUMBER_OF_ADDRESS_PINS = 3;
     const U8 MULTIPLEXER_ADDRESS_PINS[NUMBER_OF_ADDRESS_PINS] = {1, 4, 5};
     const std::map<SensorAlignment, EchoTriggerPinsS> DISTANCE_SENSORS_PINS = {{SENSOR_FRONT, {.echoAddress = 7,.triggerPin = 2}},

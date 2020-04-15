@@ -4,12 +4,14 @@
 #include <inc/lights.h>
 #include <inc/logutils.h>
 #include <inc/DistanceSensors.h>
+#include <wiringPi.h>
 
 #include <future>
 
 int main()
 {
     LOGUTILS::initLogging(false);
+    wiringPiSetup();
 
     SerialPort* lightsAndServoSerial;
     Servo* servo;
