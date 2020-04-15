@@ -4,16 +4,20 @@
 #include <chrono>
 #include <iostream>
 
-#define GET_VARIABLE_NAME(Variable) (#Variable)
-
 DistanceSensors::DistanceSensors()
 {
     qInfo("in DistanceSensors, initializing constructor");
     measurements.fill(0);
     terminateThread = false;
+
+    pinMode(COMMON_ECHO, INPUT);
+    for(int i=0; i<NUMBER_OF_ADDRESS_PINS; i++)
+    {
+        pinMode(MULTIPLEXER_ADDRESS_PINS[i], OUTPUT);
+        digitalWrite(MULTIPLEXER_ADDRESS_PINS[i], LOW);
+    }
     for(auto sensorPins : DISTANCE_SENSORS_PINS)
     {
-        pinMode(sensorPins.second.echoPin, INPUT);
         pinMode(sensorPins.second.triggerPin, OUTPUT);
         digitalWrite(sensorPins.second.triggerPin, LOW);
     }
@@ -55,6 +59,11 @@ void DistanceSensors::collectMeasurements()
         {
             SensorAlignment sensorAlignment = sensorPins.first;
             makeMeasurement(sensorAlignment);
+
+            if(terminateThread)
+            {
+                break;
+            }
         }
     }
     qInfo("in DistanceSensors::collectMeasurements, thread ended");
@@ -76,10 +85,11 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
 
 U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
 {
-    U8 pin = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoPin;
+    U8 echoAddress = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoAddress;
+    setMultiplexerAddress(echoAddress);
 
     auto timeUntilTimeout = std::chrono::high_resolution_clock::now();
-    while(digitalRead(pin) == LOW)
+    while(digitalRead(COMMON_ECHO) == LOW)
     {
         auto elapsed = std::chrono::high_resolution_clock::now() - timeUntilTimeout;
         if(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
@@ -90,24 +100,24 @@ U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
     }
 
     auto start = std::chrono::high_resolution_clock::now();
-    while(digitalRead(pin) == HIGH)
+    while(digitalRead(COMMON_ECHO) == HIGH)
     {
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
         if(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
             > SENSOR_TIMEOUT)
         {
-            return -1;
+            return 0;
         }
     }
 
     auto elapsed = std::chrono::high_resolution_clock::now() - start;
-    return std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
+    return static_cast<U32>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
 }
 
 U16 DistanceSensors::mostFrequent(const U16 array[])
 {
     // Insert all elements in hash.
-    std::unordered_map<U16, U8> hashMap;
+    std::unordered_map<U16, U16> hashMap;
     for (U8 i = 0; i < NUMBER_OF_MEASUREMENTS_PER_SENSOR; i++)
     {
         hashMap[array[i]]++;
@@ -115,7 +125,7 @@ U16 DistanceSensors::mostFrequent(const U16 array[])
 
     // find the max frequency
     U16 maxCount = 0;
-    U16 mostFrequent = -1;
+    U16 mostFrequent = 0;
     for (auto element : hashMap)
     {
         if (maxCount < element.second)
@@ -131,6 +141,15 @@ void DistanceSensors::trigger(const SensorAlignment &sensorAlignment)
 {
     U8 triggerPin = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.triggerPin;
     digitalWrite(triggerPin, HIGH);
-    delayMicroseconds(TRIGGER_DURATION);
+    std::this_thread::sleep_for(std::chrono::microseconds(TRIGGER_DURATION));
     digitalWrite(triggerPin, LOW);
+}
+
+void DistanceSensors::setMultiplexerAddress(const U8 &address)
+{
+    for(int i=0; i<NUMBER_OF_ADDRESS_PINS; i++)
+    {
+        bool state = address&static_cast<U8>(0x1 << i);
+        digitalWrite(MULTIPLEXER_ADDRESS_PINS[i], state);
+    }
 }
