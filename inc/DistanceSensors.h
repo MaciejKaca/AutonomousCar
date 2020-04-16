@@ -19,10 +19,10 @@ private:
         U8 triggerPin;
     };
     static const U8 NUMBER_OF_SENSORS = 8;
-    const U8 DELAY_BETWEEN_MEASUREMENTS = 5; //milliseconds
+    const U16 DELAY_BETWEEN_MEASUREMENTS = 300; //microseconds
     const U8 TRIGGER_DURATION = 10; //microseconds
     const U16 SENSOR_TIMEOUT = 23260; //microseconds
-    const U8 NUMBER_OF_MEASUREMENTS_PER_SENSOR = 10;
+    const U8 NUMBER_OF_MEASUREMENTS_PER_SENSOR = 5;
     const float SOUND_SPEED = 0.034;
     const U8 COMMON_ECHO = 7;
     const U8 DISTANCE_THRESHOLD = 15;

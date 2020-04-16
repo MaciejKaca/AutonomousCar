@@ -83,7 +83,7 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
         }
         else
         {
-            if(measurementsPerSensor[i] <= DISTANCE_THRESHOLD)
+            if(getDistance(sensorAlignment) <= DISTANCE_THRESHOLD)
             {
                 measurementsPerSensor[i] = MIN_DISTANCE;
             }
@@ -92,7 +92,7 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
                 measurementsPerSensor[i] = MAX_DISTANCE;
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
+        std::this_thread::sleep_for(std::chrono::microseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
     measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);
 }
@@ -102,21 +102,23 @@ U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
     U8 echoAddress = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoAddress;
     setMultiplexerAddress(echoAddress);
 
-    auto timeUntilTimeout = std::chrono::high_resolution_clock::now();
+    auto timeUntilTimeout = std::chrono::steady_clock::now();
     while(digitalRead(COMMON_ECHO) == LOW)
     {
-        auto elapsed = std::chrono::high_resolution_clock::now() - timeUntilTimeout;
+        auto elapsed = std::chrono::steady_clock::now() - timeUntilTimeout;
         if(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
             > SENSOR_TIMEOUT)
         {
-            return 0;
+            qCritical() << "in DistanceSensors::pulseIn, timeout on LOW state. "
+                           "Sensor disconected. sensorAlignment=" << sensorAlignment;
+            throw EXIT_BY_MISSING_DISTANCE_SENSOR;
         }
     }
 
-    auto start = std::chrono::high_resolution_clock::now();
+    auto start = std::chrono::steady_clock::now();
     while(digitalRead(COMMON_ECHO) == HIGH)
     {
-        auto elapsed = std::chrono::high_resolution_clock::now() - start;
+        auto elapsed = std::chrono::steady_clock::now() - start;
         if(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count()
             > SENSOR_TIMEOUT)
         {
@@ -124,7 +126,7 @@ U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
         }
     }
 
-    auto elapsed = std::chrono::high_resolution_clock::now() - start;
+    auto elapsed = std::chrono::steady_clock::now() - start;
     return static_cast<U32>(std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count());
 }
 

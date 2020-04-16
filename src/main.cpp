@@ -22,9 +22,9 @@ int main()
 
     try
     {
+        lightsAndServoSerial = new SerialPort();
         stepperMotor =  new StepperMotor();
         distanceSensors = new DistanceSensors();
-        lightsAndServoSerial = new SerialPort();
         servo = new Servo(lightsAndServoSerial, stepperMotor);
         lights = new Lights(lightsAndServoSerial);
         gamepad = new Gamepad(stepperMotor, servo, lights);
@@ -33,10 +33,8 @@ int main()
     {
         switch(excp)
         {
-        case EXIT_BY_MISSING_MODULE:
-            delete stepperMotor;
-            break;
         case EXIT_BY_MISSING_GAMEPAD:
+            delete distanceSensors;
             delete lights;
             delete servo;
             delete lightsAndServoSerial;
@@ -60,6 +58,7 @@ int main()
         switch(excp)
         {
         default:
+            delete distanceSensors;
             delete lights;
             delete servo;
             delete lightsAndServoSerial;
