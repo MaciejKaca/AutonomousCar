@@ -3,6 +3,7 @@
 #include <wiringPi.h>
 #include <chrono>
 #include <iostream>
+#include <algorithm>
 
 DistanceSensors::DistanceSensors()
 {
@@ -72,32 +73,74 @@ void DistanceSensors::collectMeasurements()
 void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
 {
     U16 measurementsPerSensor[NUMBER_OF_MEASUREMENTS_PER_SENSOR];
-    for(int i = 0; i < NUMBER_OF_MEASUREMENTS_PER_SENSOR; i++)
+    bool deviationCheck = false;
+
+    for(int checkingSensor = 0; checkingSensor < NUMBER_OF_MEASUREMENTS_PER_SENSOR; checkingSensor++)
     {
         trigger(sensorAlignment);
         U32 duration = pulseIn(sensorAlignment);
+//        U32 duration = 0;
         U16 distance = ceil((duration/2)*SOUND_SPEED);
         if(distance != 0)
         {
-            measurementsPerSensor[i] = distance;
+            measurementsPerSensor[checkingSensor] = distance;
         }
         else
         {
             if(getDistance(sensorAlignment) <= DISTANCE_THRESHOLD)
             {
-                measurementsPerSensor[i] = MIN_DISTANCE;
+                measurementsPerSensor[checkingSensor] = MIN_DISTANCE;
             }
             else
             {
-                measurementsPerSensor[i] = MAX_DISTANCE;
+                measurementsPerSensor[checkingSensor] = MAX_DISTANCE;
             }
         }
+
+        if(checkingSensor == (ceil((float)NUMBER_OF_MEASUREMENTS_PER_SENSOR/2) - 1) && checkingSensor != 0)
+        {
+            deviationCheck = true;
+            U8 distanceCheck = 0;
+            for(int i = 0; i <= checkingSensor; i++)
+            {
+                if(measurementsPerSensor[i] > SKIP_MEASUREMENTS_DISTANCE)
+                {
+                    distanceCheck++;
+                }
+            }
+
+            if(distanceCheck <= checkingSensor)
+            {
+                for(int a = 0; a <= checkingSensor && deviationCheck == true; a++)
+                {
+                    for(int b = a; b >= 0; b--)
+                    {
+                        if(abs(measurementsPerSensor[a] - measurementsPerSensor[b]) > MAX_DEVIATION_BETWEEN_MEASUREMENTS)
+                        {
+                            deviationCheck = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(deviationCheck == true)
+            {
+                measurements.at(sensorAlignment) = *std::min_element(measurementsPerSensor, measurementsPerSensor + checkingSensor);
+                break;
+            }
+        }
+
         std::this_thread::sleep_for(std::chrono::microseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
-    measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);
+
+    if(deviationCheck == false)
+    {
+        measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);
+    }
 }
 
-U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
+inline U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
 {
     U8 echoAddress = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoAddress;
     setMultiplexerAddress(echoAddress);
@@ -111,7 +154,7 @@ U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
         {
             qCritical() << "in DistanceSensors::pulseIn, timeout on LOW state. "
                            "Sensor disconected. sensorAlignment=" << sensorAlignment;
-            throw EXIT_BY_MISSING_DISTANCE_SENSOR;
+            return 0;
         }
     }
 

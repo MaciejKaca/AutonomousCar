@@ -15,8 +15,8 @@ public:
     void turn(const S8 &_angle) override;
     void setNewCenter(const S8 &_angle) override;
     const S8 &getAngle() override;
-    static const S8 MIN_ANGLE = -40;
-    static const S8 MAX_ANGLE = 40;
+    static const S8 MIN_ANGLE = -45;
+    static const S8 MAX_ANGLE = 45;
 
 private:
     SerialPort* serialPort;
@@ -27,8 +27,8 @@ private:
     void addOffset();
     volatile bool cancelCenter;
     const U8 WAIT_BEFORE_OFFSET = 200; //milliseconds
-    const S8 FROM_LEFT_OFFSET_STAND = 9;
-    const S8 FROM_LEFT_OFFSET_MOVING = 6;
-    const S8 FROM_RIGHT_OFFSET_STAND = -6;
-    const S8 FROM_RIGHT_OFFSET_MOVING = -3;
+    const S8 FROM_LEFT_OFFSET_STAND = 1;
+    const S8 FROM_LEFT_OFFSET_MOVING = 1;
+    const S8 FROM_RIGHT_OFFSET_STAND = -10;
+    const S8 FROM_RIGHT_OFFSET_MOVING = -2;
 };
