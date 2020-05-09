@@ -30,14 +30,24 @@ public:
         gamepad = new Gamepad(_stepperMotor, _servo, _lights);
     }
 
-    void handleInput(const ButtonID buttonID)
+    void handleButtonInput(ButtonID buttonID)
     {
-        gamepad->handleInput(buttonID);
+        gamepad->isReadGamepadInputThreadActive = true;
+        ButtonEvent event;
+        event.buttonID = buttonID;
+        event.buttonValue = gamepad->isButtonPressed(buttonID);
+        gamepad->buttonEvents.push_back(event);
+        gamepad->handleButtonInput();
     }
 
-    void handleInput(const AxisID buttonID)
+    void handleAxisInput(AxisID axisID)
     {
-        gamepad->handleInput(buttonID);
+        gamepad->isReadGamepadInputThreadActive = true;
+        AxisEvent event;
+        event.axisID = axisID;
+        event.axisValue = gamepad->getAxisValue(axisID);
+        gamepad->axisEvents.push_back(event);
+        gamepad->handleAxisInput();
     }
 
     void setButton(ButtonID buttonId, bool state)
@@ -76,7 +86,7 @@ TEST(GamepadTest, Brake)
     BrakeLightsCommand expectedState = BRAKE_LIGHT_STOP;
     gamepadTest.setButton(testedButton, buttonState);
     EXPECT_CALL(*stepperMotor, brake()).Times(1);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getBrakeLightsStatus() == expectedState);
 
     testedButton = X_BUTTON;
@@ -84,7 +94,7 @@ TEST(GamepadTest, Brake)
     expectedState = BRAKE_LIGHT_OFF;
     gamepadTest.setButton(testedButton, buttonState);
     EXPECT_CALL(*stepperMotor, switchOff()).Times(1);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getBrakeLightsStatus() == expectedState);
 
     bool serialState = false;
@@ -108,14 +118,14 @@ TEST(GamepadTest, LeftTurnSignal)
     bool buttonState = BUTTON_DOWN;
     TurnSignalCommand expectedState = TURN_SIGNAL_LEFT;
     gamepadTest.setButton(testedButton, buttonState);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
     testedButton = LEFT_BUMPER;
     buttonState = BUTTON_DOWN;
     expectedState = TURN_SIGNAL_OFF;
     gamepadTest.setButton(testedButton, buttonState);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
     bool serialState = false;
@@ -139,14 +149,14 @@ TEST(GamepadTest, RightTurnSignal)
     bool buttonState = BUTTON_DOWN;
     TurnSignalCommand expectedState = TURN_SIGNAL_RIGHT;
     gamepadTest.setButton(testedButton, buttonState);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
     testedButton = RIGHT_BUMPER;
     buttonState = BUTTON_DOWN;
     expectedState = TURN_SIGNAL_OFF;
     gamepadTest.setButton(testedButton, buttonState);
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     EXPECT_EQ(lights->getTurnSignalStatus(), expectedState);
 
     bool serialState = false;
@@ -177,7 +187,7 @@ TEST(GamepadTest, HazardLights)
     testedButton = LEFT_BUMPER;
     gamepadTest.setButton(testedButton, buttonState);
     TurnSignalCommand expectedState = HAZARD_LIGHTS;
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getTurnSignalStatus() == expectedState);
 
     testedButton = LEFT_BUMPER;
@@ -187,7 +197,7 @@ TEST(GamepadTest, HazardLights)
     buttonState = BUTTON_DOWN;
     gamepadTest.setButton(testedButton, buttonState);
     expectedState = TURN_SIGNAL_OFF;
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getTurnSignalStatus() == expectedState);
 
     /*
@@ -201,7 +211,7 @@ TEST(GamepadTest, HazardLights)
     testedButton = RIGHT_BUMPER;
     gamepadTest.setButton(testedButton, buttonState);
     expectedState = HAZARD_LIGHTS;
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getTurnSignalStatus() == expectedState);
 
     testedButton = RIGHT_BUMPER;
@@ -211,7 +221,7 @@ TEST(GamepadTest, HazardLights)
     buttonState = BUTTON_DOWN;
     gamepadTest.setButton(testedButton, buttonState);
     expectedState = TURN_SIGNAL_OFF;
-    gamepadTest.handleInput(testedButton);
+    gamepadTest.handleButtonInput(testedButton);
     ASSERT_TRUE(lights->getTurnSignalStatus() == expectedState);
 
     bool serialState = false;
@@ -239,15 +249,15 @@ TEST(GamepadTest, Headlights)
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
     expectedState = HEADLIGHT_DAYTIME;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
     expectedState = HEADLIGHT_HIGH_BEAM;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
     expectedState = HEADLIGHT_OFF;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(lights->getHeadLightStatus(), expectedState);
 
     bool serialState = false;
@@ -275,11 +285,11 @@ TEST(GamepadTest, BrakeLights)
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedState);
 
     expectedState = BRAKE_LIGHT_DAYTIME;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedState);
 
     expectedState = BRAKE_LIGHT_OFF;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedState);
 
     bool serialState = false;
@@ -303,13 +313,13 @@ TEST(GamepadTest, Turn)
     S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
     S8 expectedAngle = Servo::MAX_ANGLE;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(servo->getAngle(), expectedAngle);
 
     axisValue = JoystickEvent::MIN_AXES_VALUE;
     expectedAngle = Servo::MIN_ANGLE;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(servo->getAngle(), expectedAngle);
 
     axisValue = 0;
@@ -317,7 +327,7 @@ TEST(GamepadTest, Turn)
     gamepadTest.setAxis(testedAxis, axisValue);
     U8 speed = 0;
     EXPECT_CALL(*stepperMotor, getSpeed).WillOnce(ReturnRef(speed));
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     usleep(500000);
     EXPECT_EQ(servo->getAngle(), expectedAngle);
 
@@ -343,7 +353,7 @@ TEST(GamepadTest, ForwardMovement)
     S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
     U8 expectedSpeed = StepperMotor::MAX_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -351,7 +361,7 @@ TEST(GamepadTest, ForwardMovement)
     axisValue = 0;
     expectedSpeed = StepperMotor::MAX_SPEED/2;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -359,7 +369,7 @@ TEST(GamepadTest, ForwardMovement)
     axisValue = JoystickEvent::MIN_AXES_VALUE;
     expectedSpeed = StepperMotor::MIN_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -387,7 +397,7 @@ TEST(GamepadTest, BackwardMovement)
     S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
     U8 expectedSpeed = StepperMotor::MAX_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -398,7 +408,7 @@ TEST(GamepadTest, BackwardMovement)
     axisValue = 0;
     expectedSpeed = StepperMotor::MAX_SPEED/2;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -410,7 +420,7 @@ TEST(GamepadTest, BackwardMovement)
     axisValue = JoystickEvent::MIN_AXES_VALUE;
     expectedSpeed = StepperMotor::MIN_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -428,7 +438,8 @@ TEST(GamepadTest, BothTrigersAtOnce)
     ServoMock *servo = new ServoMock;
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, (Lights*)lights);
     stepperMotor->move(FORWARD, StepperMotor::MAX_SPEED);
-    //Off
+
+    //Reverse Off
     ReverseLightCommand reverseLightStatus = REVERSE_LIGHT_OFF;
     EXPECT_CALL(*lights, getReverseLightStatus)
         .WillRepeatedly(ReturnRef(reverseLightStatus));
@@ -439,33 +450,34 @@ TEST(GamepadTest, BothTrigersAtOnce)
     U8 expectedSpeed = 0;
     gamepadTest.setAxis(LEFT_TRIGGER, axisValue);
     gamepadTest.setAxis(RIGHT_TRIGGER, axisValue);
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
     //Right pressed first
     testedAxis = RIGHT_TRIGGER;
     axisValue = JoystickEvent::MAX_AXES_VALUE;
     expectedSpeed = 0;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
     //Both and brake, Left first
     testedAxis = LEFT_TRIGGER;
     axisValue = JoystickEvent::MAX_AXES_VALUE;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
     //Both and brake, Right first
     testedAxis = RIGHT_TRIGGER;
     axisValue = JoystickEvent::MAX_AXES_VALUE;
-    gamepadTest.handleInput(testedAxis);
+    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
     //Both and brake, button triggers action
     axisValue = JoystickEvent::MAX_AXES_VALUE;
     gamepadTest.setButton(X_BUTTON, BUTTON_DOWN);
     EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
-    gamepadTest.handleInput(X_BUTTON);
+    EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
+    gamepadTest.handleButtonInput(X_BUTTON);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
     delete lights;

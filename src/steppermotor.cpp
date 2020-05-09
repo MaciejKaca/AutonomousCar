@@ -142,26 +142,25 @@ const StepperMotorDirection &StepperMotor::getDirection()
 void StepperMotor::acceleration()
 {
     static U16 stepNumber = 0;
-    if(desiredSpeed >= minimumAccelerationSpeed ||
-        speed > minimumAccelerationSpeed)
+    if(speed == 0)
     {
-        if(speed < minimumAccelerationSpeed)
+        stepNumber = 0;
+    }
+    if(speed < desiredSpeed)
+    {
+        stepNumber+=ACCEL_STEP_RESOLUTION;
+        if(stepNumber < ACCEL_FUNC_SWITCH_THRES)
         {
-            stepNumber = 0;
+            speed = ceil(stepNumber*ACCELERATION_LINEAR);
         }
-        if(speed < desiredSpeed)
+        else
         {
-            stepNumber+=accelerationStepResolution;
-            speed = ceil(log(stepNumber+xAxisOffset)*ACCELERATION);
-        }
-        else if(speed > desiredSpeed)
-        {
-            stepNumber-=accelerationStepResolution;
-            speed = floor(log(stepNumber+xAxisOffset)*ACCELERATION);
+            speed = ceil(log(stepNumber+X_AXIS_OFFSET)*ACCELERATION_LOG);
         }
     }
-    else
+    else if(speed > desiredSpeed)
     {
-        speed = desiredSpeed;
+        stepNumber-=ACCEL_STEP_RESOLUTION;
+        speed = floor(log(stepNumber+X_AXIS_OFFSET)*ACCELERATION_LOG);
     }
 }

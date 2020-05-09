@@ -3,6 +3,6 @@
 class GamepadBase
 {
     public:
-        virtual bool readGamepadInput() = 0;
+        virtual void readGamepadInput() = 0;
         virtual ~GamepadBase() = 0;
 };

@@ -21,22 +21,25 @@ class StepperMotor : StepperMotorBase
         static const U16 MIN_SPEED = 0;
 
     private:
-        U16 speed;
-        StepperMotorDirection direction;
         bool validateSpeed(const U16 &_speed);
-        std::thread stepperThread;
         void checkAndStopThread();
         void constantMovement();
-        bool threadStatus;
         void acceleration();
+
+        bool threadStatus;
+        std::thread stepperThread;
         U16 desiredSpeed;
+        U16 speed;
+        StepperMotorDirection direction;
+
         const U16 MAX_DELAY = 2000;
         const U16 MIN_DELAY = 400;
-        const float ACCELERATION = 12.5;
         const U8 STEPPER_ENABLE_PIN = 27;
         const U8 STEPPER_STEP_PIN = 29;
         const U8 STEPPER_DIRECTION_PIN = 28;
-        const U8 xAxisOffset = 1;
-        const U8 accelerationStepResolution = 1;
-        const U8 minimumAccelerationSpeed = ceil(log(xAxisOffset+accelerationStepResolution)*ACCELERATION);
+        const U8 X_AXIS_OFFSET = 1;
+        const U8 ACCEL_STEP_RESOLUTION = 1;
+        const U8 ACCEL_FUNC_SWITCH_THRES = 225;
+        const float ACCELERATION_LOG = 12.5;
+        const float ACCELERATION_LINEAR = 0.3;
 };
