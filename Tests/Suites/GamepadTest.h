@@ -60,6 +60,16 @@ public:
         gamepad->axisState[axisId] = value;
     }
 
+    void startThread()
+    {
+        gamepad->startThread();
+    }
+
+    void stopThread()
+    {
+        gamepad->stopThread();
+    }
+
     ~GamepadTest()
     {
         delete gamepad;
@@ -430,56 +440,233 @@ TEST(GamepadTest, BackwardMovement)
     delete stepperMotor;
 }
 
-TEST(GamepadTest, BothTrigersAtOnce)
+TEST(GamepadTest, ButtonCombinations)
 {
+    const U16 WAIT_SHORT = 500;
+
     StepperMotorStub *stepperMotor = new StepperMotorStub();
     SerialPortMock *serialPort = new SerialPortMock();
     LightsMock *lights = new LightsMock();
     ServoMock *servo = new ServoMock;
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, (Lights*)lights);
     stepperMotor->move(FORWARD, StepperMotor::MAX_SPEED);
+    gamepadTest.startThread();
+
+    U8 expectedSpeed;
+    StepperMotorDirection expectedDirection;
 
     //Reverse Off
     ReverseLightCommand reverseLightStatus = REVERSE_LIGHT_OFF;
     EXPECT_CALL(*lights, getReverseLightStatus)
         .WillRepeatedly(ReturnRef(reverseLightStatus));
 
-    //Right pressed first
-    AxisID testedAxis = LEFT_TRIGGER;
-    S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
-    U8 expectedSpeed = 0;
-    gamepadTest.setAxis(LEFT_TRIGGER, axisValue);
-    gamepadTest.setAxis(RIGHT_TRIGGER, axisValue);
-    gamepadTest.handleAxisInput(testedAxis);
-    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+    ////////////////////////////////////////////////////
+    //  @Description:
+    //  Test combination of two triggers pressed at once,
+    //  then release right trigger
+    //
+    //  @Trigger:
+    //  1. Both triggers pressed, right pressed first
+    //
+    //  @Verification:
+    //  2. Speed == 0
+    //
+    //  @Trigger:
+    //  3. Release right trigger
+    //
+    //  @Verification:
+    //  4. Speed == MAX_SPEED
+    //  5. Direction == BACKWARD
+    ////////////////////////////////////////////////////
 
-    //Right pressed first
-    testedAxis = RIGHT_TRIGGER;
-    axisValue = JoystickEvent::MAX_AXES_VALUE;
+    //  @Trigger:
+    //  1. Both triggers pressed, right pressed first
+    AxisID testedAxis = RIGHT_TRIGGER;
+    S16 RightAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    S16 LeftAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    gamepadTest.setAxis(LEFT_TRIGGER, LeftAxisValue);
+    gamepadTest.setAxis(RIGHT_TRIGGER, RightAxisValue);
+    gamepadTest.handleAxisInput(testedAxis);
+
+    //  @Verification:
+    //  2. Speed == 0
     expectedSpeed = 0;
-    gamepadTest.handleAxisInput(testedAxis);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
-    //Both and brake, Left first
-    testedAxis = LEFT_TRIGGER;
-    axisValue = JoystickEvent::MAX_AXES_VALUE;
-    gamepadTest.handleAxisInput(testedAxis);
-    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
-
-    //Both and brake, Right first
-    testedAxis = RIGHT_TRIGGER;
-    axisValue = JoystickEvent::MAX_AXES_VALUE;
-    gamepadTest.handleAxisInput(testedAxis);
-    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
-
-    //Both and brake, button triggers action
-    axisValue = JoystickEvent::MAX_AXES_VALUE;
-    gamepadTest.setButton(X_BUTTON, BUTTON_DOWN);
-    EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
+    //  @Trigger:
+    //  3. Release right trigger
+    RightAxisValue = JoystickEvent::MIN_AXES_VALUE;
+    gamepadTest.setAxis(testedAxis, RightAxisValue);
     EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
-    gamepadTest.handleButtonInput(X_BUTTON);
+    gamepadTest.handleAxisInput(testedAxis);
+
+    //  @Verification:
+    //  4. Speed > 0
+    //  5. Direction == BACKWARD
+    expectedSpeed = StepperMotor::MAX_SPEED;
+    expectedDirection = BACKWARD;
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+    EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
+
+    //////////////////////////////////////////////////
+    //  @Description:
+    //  Test combination of two triggers pressed at once,
+    //  then release left trigger
+    //
+    //  @Trigger:
+    //  1. Both triggers pressed, left pressed first
+    //
+    //  @Verification:
+    //  2. Speed == 0
+    //
+    //  @Trigger:
+    //  3. Release left trigger
+    //
+    //  @Verification:
+    //  4. Speed == MAX_SPEED
+    //  5. Direction == FOWARD
+    //////////////////////////////////////////////////
+
+    //  @Trigger:
+    //  1. Both triggers pressed, right pressed first
+    testedAxis = LEFT_TRIGGER;
+    RightAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    LeftAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    gamepadTest.setAxis(LEFT_TRIGGER, LeftAxisValue);
+    gamepadTest.setAxis(RIGHT_TRIGGER, RightAxisValue);
+    gamepadTest.handleAxisInput(testedAxis);
+
+    //  @Verification:
+    //  2. Speed == 0
+    expectedSpeed = 0;
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
 
+    //  @Trigger:
+    //  3. Release right trigger
+    LeftAxisValue = JoystickEvent::MIN_AXES_VALUE;
+    gamepadTest.setAxis(testedAxis, LeftAxisValue);
+    EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
+    gamepadTest.handleAxisInput(testedAxis);
+
+    //  @Verification:
+    //  4. Speed > 0
+    //  5. Direction == BACKWARD
+    expectedSpeed = StepperMotor::MAX_SPEED;
+    expectedDirection = FORWARD;
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+    EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
+
+    //////////////////////////////////////////////////
+    //  @Description:
+    //  Test combination of right trigger and brake
+    //  pressed, then release brake
+    //
+    //  @Trigger:
+    //  1. Right trigger and brake pressed.
+    //
+    //  @Verification:
+    //  2. Speed == 0
+    //
+    //  @Trigger:
+    //  3. Release brake
+    //
+    //  @Verification:
+    //  4. Speed == MAX_SPEED
+    //  5. Direction == FORWARD
+    //////////////////////////////////////////////////
+
+    //  @Trigger:
+    //  1. Right trigger and brake pressed.
+    ButtonID brakeButton = X_BUTTON;
+    bool buttonValue = BUTTON_DOWN;
+    testedAxis = LEFT_TRIGGER;
+    RightAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    LeftAxisValue = JoystickEvent::MIN_AXES_VALUE;
+    gamepadTest.setAxis(LEFT_TRIGGER, LeftAxisValue);
+    gamepadTest.setAxis(RIGHT_TRIGGER, RightAxisValue);
+    gamepadTest.setButton(brakeButton, buttonValue);
+    EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
+    gamepadTest.handleButtonInput(brakeButton);
+
+    //  @Verification:
+    //  2. Speed == 0
+    expectedSpeed = 0;
+    usleep(WAIT_SHORT);
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+
+    //  @Trigger:
+    //  3. Release brake
+    buttonValue = BUTTON_UP;
+    gamepadTest.setButton(brakeButton, buttonValue);
+    EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
+    EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
+    gamepadTest.handleButtonInput(brakeButton);
+
+    //  @Verification:
+    //  4. Speed > 0
+    //  5. Direction == FORWARD
+    expectedDirection = FORWARD;
+    expectedSpeed = StepperMotor::MAX_SPEED;
+    usleep(WAIT_SHORT);
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+    EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
+
+    //////////////////////////////////////////////////
+    //  @Description:
+    //  Test combination of left trigger and brake
+    //  pressed, then release brake
+    //
+    //  @Trigger:
+    //  1. Left trigger and brake pressed.
+    //
+    //  @Verification:
+    //  2. Speed == 0
+    //
+    //  @Trigger:
+    //  3. Release brake
+    //
+    //  @Verification:
+    //  4. Speed == MAX_SPEED
+    //  5. Direction == BACKWARD
+    //////////////////////////////////////////////////
+
+    //  @Trigger:
+    //  1. Left trigger and brake pressed.
+    brakeButton = X_BUTTON;
+    buttonValue = BUTTON_DOWN;
+    testedAxis = LEFT_TRIGGER;
+    RightAxisValue = JoystickEvent::MIN_AXES_VALUE;
+    LeftAxisValue = JoystickEvent::MAX_AXES_VALUE;
+    gamepadTest.setAxis(LEFT_TRIGGER, LeftAxisValue);
+    gamepadTest.setAxis(RIGHT_TRIGGER, RightAxisValue);
+    gamepadTest.setButton(brakeButton, buttonValue);
+    EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
+    gamepadTest.handleButtonInput(brakeButton);
+
+    //  @Verification:
+    //  2. Speed == 0
+    expectedSpeed = 0;
+    usleep(WAIT_SHORT);
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+
+    //  @Trigger:
+    //  3. Release brake
+    buttonValue = BUTTON_UP;
+    gamepadTest.setButton(brakeButton, buttonValue);
+    EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
+    EXPECT_CALL(*lights, setBrakeLights(_)).Times(1);
+    gamepadTest.handleButtonInput(brakeButton);
+
+    //  @Verification:
+    //  4. Speed > 0
+    //  5. Direction == BACKWARD
+    expectedDirection = BACKWARD;
+    expectedSpeed = StepperMotor::MAX_SPEED;
+    usleep(WAIT_SHORT);
+    EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
+    EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
+
+    gamepadTest.stopThread();
     delete lights;
     delete servo;
     delete serialPort;
