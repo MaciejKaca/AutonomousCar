@@ -23,7 +23,7 @@ private:
 StepperMotorStub::StepperMotorStub()
 {
     speed = 0;
-    direction = FORWARD;
+    direction = DIRECTION_FORWARD;
 }
 
 void StepperMotorStub::move(const StepperMotorDirection _direction, const U16 _speed)

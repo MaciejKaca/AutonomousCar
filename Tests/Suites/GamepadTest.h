@@ -359,7 +359,7 @@ TEST(GamepadTest, ForwardMovement)
 
     //Max spped
     AxisID testedAxis = RIGHT_TRIGGER;
-    StepperMotorDirection expectedDirection = FORWARD;
+    StepperMotorDirection expectedDirection = DIRECTION_FORWARD;
     S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
     U8 expectedSpeed = StepperMotor::MAX_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
@@ -403,7 +403,7 @@ TEST(GamepadTest, BackwardMovement)
         .WillOnce(ReturnRef(reverseLightStatus));
     EXPECT_CALL(*lights, setReverseLight(_)).Times(1);
     AxisID testedAxis = LEFT_TRIGGER;
-    StepperMotorDirection expectedDirection = BACKWARD;
+    StepperMotorDirection expectedDirection = DIRECTION_BACKWARD;
     S16 axisValue = JoystickEvent::MAX_AXES_VALUE;
     U8 expectedSpeed = StepperMotor::MAX_SPEED;
     gamepadTest.setAxis(testedAxis, axisValue);
@@ -449,7 +449,7 @@ TEST(GamepadTest, ButtonCombinations)
     LightsMock *lights = new LightsMock();
     ServoMock *servo = new ServoMock;
     GamepadTest gamepadTest((StepperMotor*)stepperMotor, (Servo*)servo, (Lights*)lights);
-    stepperMotor->move(FORWARD, StepperMotor::MAX_SPEED);
+    stepperMotor->move(DIRECTION_FORWARD, StepperMotor::MAX_SPEED);
     gamepadTest.startThread();
 
     U8 expectedSpeed;
@@ -504,7 +504,7 @@ TEST(GamepadTest, ButtonCombinations)
     //  4. Speed > 0
     //  5. Direction == BACKWARD
     expectedSpeed = StepperMotor::MAX_SPEED;
-    expectedDirection = BACKWARD;
+    expectedDirection = DIRECTION_BACKWARD;
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -552,7 +552,7 @@ TEST(GamepadTest, ButtonCombinations)
     //  4. Speed > 0
     //  5. Direction == BACKWARD
     expectedSpeed = StepperMotor::MAX_SPEED;
-    expectedDirection = FORWARD;
+    expectedDirection = DIRECTION_FORWARD;
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
     EXPECT_EQ(stepperMotor->getDirection(), expectedDirection);
 
@@ -605,7 +605,7 @@ TEST(GamepadTest, ButtonCombinations)
     //  @Verification:
     //  4. Speed > 0
     //  5. Direction == FORWARD
-    expectedDirection = FORWARD;
+    expectedDirection = DIRECTION_FORWARD;
     expectedSpeed = StepperMotor::MAX_SPEED;
     usleep(WAIT_SHORT);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);
@@ -660,7 +660,7 @@ TEST(GamepadTest, ButtonCombinations)
     //  @Verification:
     //  4. Speed > 0
     //  5. Direction == BACKWARD
-    expectedDirection = BACKWARD;
+    expectedDirection = DIRECTION_BACKWARD;
     expectedSpeed = StepperMotor::MAX_SPEED;
     usleep(WAIT_SHORT);
     EXPECT_EQ(stepperMotor->getSpeed(), expectedSpeed);

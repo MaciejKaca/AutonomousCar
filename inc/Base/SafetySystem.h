@@ -1,0 +1,4 @@
+#ifndef SAFETYSYSTEM_H
+#define SAFETYSYSTEM_H
+
+#endif // SAFETYSYSTEM_H

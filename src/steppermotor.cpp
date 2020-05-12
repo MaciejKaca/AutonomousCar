@@ -22,9 +22,11 @@ StepperMotor::StepperMotor()
     digitalWrite(STEPPER_ENABLE_PIN, LOW);
     digitalWrite(STEPPER_STEP_PIN, LOW);
 
-    threadStatus = false;
     speed = 0;
     desiredSpeed = 0;
+    terminateThread = true;
+
+    stepperThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
 }
 
 StepperMotorBase::~StepperMotorBase(){}
@@ -52,11 +54,11 @@ bool StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _s
 {
     U16 delay = MAX_DELAY - _speed*((MAX_DELAY-MIN_DELAY)/(MAX_SPEED-MIN_SPEED));
 
-    if(_direction == FORWARD)
+    if(_direction == DIRECTION_FORWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
     }
-    else if(_direction == BACKWARD)
+    else if(_direction == DIRECTION_BACKWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
@@ -73,8 +75,9 @@ bool StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _s
 
 void StepperMotor::brake()
 {
-    checkAndStopThread();
     qInfo("in StepperMotor::brake(): braking");
+
+    stopThread();
     speed = 0;
     desiredSpeed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, HIGH);
@@ -82,8 +85,9 @@ void StepperMotor::brake()
 
 void StepperMotor::switchOff()
 {
-    checkAndStopThread();
     qInfo("in StepperMotor::switchOff(): switchOff off stepper");
+
+    stopThread();
     speed = 0;
     desiredSpeed = 0;
     digitalWrite(STEPPER_ENABLE_PIN, LOW);
@@ -91,22 +95,13 @@ void StepperMotor::switchOff()
 
 void StepperMotor::constantMovement()
 {
-    while(threadStatus == true)
+    while(!terminateThread)
     {
         acceleration();
         makeStep(direction, speed);
     }
 }
 
-void StepperMotor::checkAndStopThread()
-{
-    if(threadStatus == true)
-    {
-        qInfo("in StepperMotor::checkAndStopThread(): stopping thread");
-        threadStatus = false;
-        stepperThread.join();
-    }
-}
 
 void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _speed)
 {
@@ -115,21 +110,11 @@ void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _spee
         desiredSpeed = _speed;
         direction = _direction;
 
-        if(threadStatus == false)
-        {
-            threadStatus = true;
-            qInfo("in StepperMotor::move(): launching thread for constantMovement");
-            stepperThread = std::thread(&StepperMotor::constantMovement, this);
-        }
+        launchThread();
     }
 }
 
-const bool &StepperMotor::isThreadActive()
-{
-    return threadStatus;
-}
-
-const U16 &StepperMotor::getSpeed()
+const double& StepperMotor::getSpeed()
 {
     return speed;
 }
@@ -141,26 +126,58 @@ const StepperMotorDirection &StepperMotor::getDirection()
 
 void StepperMotor::acceleration()
 {
-    static U16 stepNumber = 0;
     if(speed == 0)
     {
-        stepNumber = 0;
+        speed++;
     }
     if(speed < desiredSpeed)
     {
-        stepNumber+=ACCEL_STEP_RESOLUTION;
-        if(stepNumber < ACCEL_FUNC_SWITCH_THRES)
+        if(speed < ACCEL_FUNC_SWITCH_THRES)
         {
-            speed = ceil(stepNumber*ACCELERATION_LINEAR);
+            speed = (((speed/ACCELERATION_LINEAR)+ACCEL_STEP_RESOLUTION)*ACCELERATION_LINEAR);
         }
         else
         {
-            speed = ceil(log(stepNumber+X_AXIS_OFFSET)*ACCELERATION_LOG);
+            speed = (log(exp(speed/ACCELERATION_LOG)+ACCEL_STEP_RESOLUTION)*ACCELERATION_LOG);
+        }
+
+        if(speed > desiredSpeed)
+        {
+            speed = desiredSpeed;
         }
     }
     else if(speed > desiredSpeed)
     {
-        stepNumber-=ACCEL_STEP_RESOLUTION;
-        speed = floor(log(stepNumber+X_AXIS_OFFSET)*ACCELERATION_LOG);
+        speed = floor(((speed/ACCELERATION_LINEAR)-ACCEL_STEP_RESOLUTION)*ACCELERATION_LINEAR);
     }
+}
+
+bool StepperMotor::isThreadRunning()
+{
+    auto status = stepperThread.wait_for(std::chrono::microseconds(0));
+    if (status == std::future_status::ready)
+    {
+        return false;
+    }
+    else
+    {
+        return  true;
+    }
+}
+
+void StepperMotor::launchThread()
+{
+    if(!isThreadRunning())
+    {
+        qInfo("in StepperMotor::launchThread(): launching thread for constantMovement");
+        stepperThread.get();
+        terminateThread = false;
+        stepperThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
+    }
+}
+
+void StepperMotor::stopThread()
+{
+    qInfo("in StepperMotor::stopThread(): stopping thread");
+    terminateThread = true;
 }

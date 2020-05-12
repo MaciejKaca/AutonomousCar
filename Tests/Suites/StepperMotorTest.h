@@ -14,7 +14,7 @@ TEST(StepperMotorTest, moveMinSpeed)
     ASSERT_FALSE(stepperMotor.isThreadActive());
 
     U16 expectedSpeed = StepperMotor::MIN_SPEED+1;
-    StepperMotorDirection expectedDirection = FORWARD;
+    StepperMotorDirection expectedDirection = DIRECTION_FORWARD;
     stepperMotor.move(expectedDirection, expectedSpeed);
     ASSERT_TRUE(stepperMotor.isThreadActive());
     usleep(500000);
@@ -30,7 +30,7 @@ TEST(StepperMotorTest, moveMaxSpeed)
     ASSERT_FALSE(stepperMotor.isThreadActive());
 
     U16 expectedSpeed = StepperMotor::MAX_SPEED;
-    StepperMotorDirection expectedDirection = BACKWARD;
+    StepperMotorDirection expectedDirection = DIRECTION_BACKWARD;
     stepperMotor.move(expectedDirection, expectedSpeed);
     ASSERT_TRUE(stepperMotor.isThreadActive());
     sleep(5);
@@ -46,7 +46,7 @@ TEST(StepperMotorTest, deceleration)
     ASSERT_FALSE(stepperMotor.isThreadActive());
 
     U16 expectedSpeed = StepperMotor::MAX_SPEED;
-    StepperMotorDirection expectedDirection = BACKWARD;
+    StepperMotorDirection expectedDirection = DIRECTION_BACKWARD;
     stepperMotor.move(expectedDirection, expectedSpeed);
     ASSERT_TRUE(stepperMotor.isThreadActive());
     sleep(5);

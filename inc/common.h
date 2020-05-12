@@ -41,8 +41,10 @@ enum StepperMotorCommand
 
 enum StepperMotorDirection
 {
-    FORWARD = 0,
-    BACKWARD = 1
+    DIRECTION_FORWARD = 0,
+    DIRECTION_BACKWARD = 1,
+    DIRECTION_BOTH = 2,
+    DIRECTION_BLOCK_ALL = 3
 };
 
 enum ButtonID

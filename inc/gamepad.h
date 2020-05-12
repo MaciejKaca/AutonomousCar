@@ -11,9 +11,7 @@
 #include <future>
 #include <vector>
 
-#include "Base/GamepadBase.h"
-
-class Gamepad : GamepadBase
+class Gamepad
 {
     friend class GamepadTest;
 
@@ -22,7 +20,6 @@ class Gamepad : GamepadBase
         void startThread();
         void stopThread();
         void waitForExitButton();
-        void readGamepadInput() override;
         ~Gamepad();
 
     private:
@@ -72,6 +69,7 @@ class Gamepad : GamepadBase
         void handleAxisInput();
         void launchHandleButtonInputThread();
         void launchHandleAxisInputThread();
+        void readGamepadInput();
 
         const bool &isButtonPressed(const ButtonID &buttonID);
         const short &getAxisValue(const AxisID &axisID);

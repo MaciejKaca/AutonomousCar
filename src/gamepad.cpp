@@ -34,10 +34,10 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     servo = _servo;
     lights = _lights;
 
-    buttonState[ButtonID::X_BUTTON] = false;
-    buttonState[ButtonID::EXIT_BUTTON] = false;
-    buttonState[ButtonID::LEFT_BUMPER] = false;
-    buttonState[ButtonID::RIGHT_BUMPER] = false;
+    buttonState[ButtonID::X_BUTTON] = BUTTON_UP;
+    buttonState[ButtonID::EXIT_BUTTON] = BUTTON_UP;
+    buttonState[ButtonID::LEFT_BUMPER] = BUTTON_UP;
+    buttonState[ButtonID::RIGHT_BUMPER] = BUTTON_UP;
 
     axisState[AxisID::LEFT_X_AXIS] = 0;
     axisState[AxisID::ARROW_Y_AXIS] = 0;
@@ -55,8 +55,6 @@ Gamepad::~Gamepad()
     delete joystick;
 }
 
-GamepadBase::~GamepadBase(){}
-
 void Gamepad::startThread()
 {
     qInfo("in Gamepad::startThread, starting thread");
@@ -69,20 +67,18 @@ void Gamepad::stopThread()
 {
     qInfo("in Gamepad::stopThread, terminating thread");
     isReadGamepadInputThreadActive = false;
+    readGamepadInputThread.get();
 
-    if(isHandleAxisInputsThreadActive == true)
+    auto status = handleAxisInputsThread.wait_for(std::chrono::microseconds(0));
+    if (status == std::future_status::ready)
     {
         handleAxisInputsThread.get();
     }
 
-    if(isHandleButtonInputsThreadActive == true)
+    status = handleButtonInputsThread.wait_for(std::chrono::microseconds(0));
+    if (status == std::future_status::ready)
     {
         handleButtonInputsThread.get();
-    }
-
-    if(isReadGamepadInputThreadActive == true)
-    {
-        readGamepadInputThread.get();
     }
 }
 
@@ -141,11 +137,6 @@ void Gamepad::launchHandleAxisInputThread()
     if (status == std::future_status::ready)
     {
         handleAxisInputsThread.get();
-    }
-
-    if(!isHandleAxisInputsThreadActive)
-    {
-        isHandleAxisInputsThreadActive = true;
         handleAxisInputsThread = std::async(std::launch::async, &Gamepad::handleAxisInput, this);
     }
 }
@@ -156,11 +147,6 @@ void Gamepad::launchHandleButtonInputThread()
     if (status == std::future_status::ready)
     {
         handleButtonInputsThread.get();
-    }
-
-    if(!isHandleButtonInputsThreadActive)
-    {
-        isHandleButtonInputsThreadActive = true;
         handleButtonInputsThread = std::async(std::launch::async, &Gamepad::handleButtonInput, this);
     }
 }
@@ -177,11 +163,9 @@ void Gamepad::readGamepadInput()
             qCritical( "Gamepad disconnected");
             throw EXIT_BY_MISSING_GAMEPAD;
         }
-
-        JoystickEvent event;
-
         std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_REFRESH_TIME));
 
+        JoystickEvent event;
         if(joystick->sample(&event))
         {
             if(event.isButton())
@@ -304,9 +288,9 @@ void Gamepad::handleButtonInput()
             default:
                 break;
         }
+        buttonState[buttonEvent.buttonID] = buttonEvent.buttonValue;
         buttonEvents.erase(buttonEvents.begin());
     }
-    isHandleButtonInputsThreadActive = false;
 }
 
 void Gamepad::handleAxisInput()
@@ -323,7 +307,7 @@ void Gamepad::handleAxisInput()
                     {
                         if(getAxisValue(LEFT_TRIGGER) < AXIS_MIN_TRIGGER_POSITION)
                         {
-                            stepperMotor->move(FORWARD, axisToSpeed(axisEvent.axisValue));
+                            stepperMotor->move(DIRECTION_FORWARD, axisToSpeed(axisEvent.axisValue));
                         }
                         else
                         {
@@ -360,7 +344,7 @@ void Gamepad::handleAxisInput()
                                 lights->setReverseLight(REVERSE_LIGHT_ON);
                             }
 
-                            stepperMotor->move(BACKWARD, axisToSpeed(axisEvent.axisValue));
+                            stepperMotor->move(DIRECTION_BACKWARD, axisToSpeed(axisEvent.axisValue));
                         }
                         else
                         {
@@ -428,7 +412,7 @@ void Gamepad::handleAxisInput()
             default:
                 break;
         }
+        axisState[axisEvent.axisID] = axisEvent.axisValue;
         axisEvents.erase(axisEvents.begin());
     }
-    isHandleAxisInputsThreadActive = false;
 }
