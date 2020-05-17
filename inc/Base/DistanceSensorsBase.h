@@ -5,8 +5,8 @@
 class DistanceSensorsBase
 {
 public:
-    virtual const U16 &getDistance(const SensorAlignment &sensorAlignment) = 0;
-    virtual void startThread() = 0;
-    virtual void stopThread() = 0;
+    virtual U16 getDistance(SensorAlignment sensorAlignment) = 0;
+    virtual void addSensorToQueue(std::vector<SensorAlignment> sensorsAlignment) = 0;
+    virtual void removeSensorFromQueue(std::vector<SensorAlignment> sensorsAlignment) = 0;
     virtual ~DistanceSensorsBase() = 0;
 };

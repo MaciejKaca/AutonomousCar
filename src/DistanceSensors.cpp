@@ -1,18 +1,27 @@
 #include <inc/common.h>
 #include <inc/DistanceSensors.h>
+
 #include <wiringPi.h>
 #include <chrono>
 #include <iostream>
 #include <algorithm>
+#include <mutex>
 
 DistanceSensors::DistanceSensors()
 {
     qInfo("in DistanceSensors, initializing constructor");
-    measurements.fill(0);
-    terminateThread = false;
+    SensorState sensorState;
+    sensorState.distance = MAX_DISTANCE;
+    sensorState.sensorActive = false;
+    for(U8 i = 0; i < NUMBER_OF_SENSORS; i++)
+    {
+        measurements[i].distance = sensorState.distance;
+        measurements[i].sensorActive = sensorState.sensorActive;
+    }
+    isDistanceSensorThreadActive = false;
 
     pinMode(COMMON_ECHO, INPUT);
-    for(int i=0; i<NUMBER_OF_ADDRESS_PINS; i++)
+    for(U8 i=0; i<MULTIPLEXER_ADDRESS_PINS.size(); i++)
     {
         pinMode(MULTIPLEXER_ADDRESS_PINS[i], OUTPUT);
         digitalWrite(MULTIPLEXER_ADDRESS_PINS[i], LOW);
@@ -27,41 +36,59 @@ DistanceSensors::DistanceSensors()
 DistanceSensors::~DistanceSensors()
 {
     qInfo("in DistanceSensors::~DistanceSensors, destructor called");
+    if(sensorQueueCounter.size() > 0)
+    {
+        qWarning() << "in DistanceSensors::~DistanceSensors, not all sensors cleared: ";
+        for(auto sensor : sensorQueueCounter)
+        {
+            qWarning() << "Sensor nr: " << sensor.first << " called times: " << sensor.second;
+        }
+    }
     stopThread();
 }
 
 DistanceSensorsBase::~DistanceSensorsBase(){}
 
-const U16 &DistanceSensors::getDistance(const SensorAlignment &sensorAlignment)
+U16 DistanceSensors::getDistance(SensorAlignment sensorAlignment)
 {
-    return measurements.at(sensorAlignment);
+    std::lock_guard<std::mutex> lock(measurements_mutex);
+    return measurements[sensorAlignment].distance;
 }
 
 void DistanceSensors::startThread()
 {
     qInfo("in DistanceSensors::startThread, launching thread");
-    terminateThread = false;
-    measurementThread = std::async(std::launch::async, &DistanceSensors::collectMeasurements, this);
+
+    if (!isDistanceSensorThreadActive)
+    {
+        qInfo("in DistanceSensors::startThread, thread launched");
+        isDistanceSensorThreadActive = true;
+        measurementThread = std::async(std::launch::async, &DistanceSensors::collectMeasurements, this);
+    }
 }
 
 void DistanceSensors::stopThread()
 {
     qInfo("in DistanceSensors::stopThread, stopping thread");
-    terminateThread = true;
-    measurementThread.get();
+    if(isDistanceSensorThreadActive)
+    {
+        isDistanceSensorThreadActive = false;
+        measurementThread.get();
+    }
+    qInfo("in DistanceSensors::stopThread, thread stopped");
 }
 
 void DistanceSensors::collectMeasurements()
 {
     qInfo("in DistanceSensors::collectMeasurements, succesfull thread launching");
-    while(!terminateThread)
+    while(sensorQueueCounter.size() > 0 && isDistanceSensorThreadActive)
     {
-        for(auto sensorPins : DISTANCE_SENSORS_PINS)
+        for(auto sensor : sensorQueueCounter)
         {
-            SensorAlignment sensorAlignment = sensorPins.first;
+            SensorAlignment sensorAlignment = sensor.first;
             makeMeasurement(sensorAlignment);
 
-            if(terminateThread)
+            if(!isDistanceSensorThreadActive)
             {
                 break;
             }
@@ -73,7 +100,6 @@ void DistanceSensors::collectMeasurements()
 void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
 {
     U16 measurementsPerSensor[NUMBER_OF_MEASUREMENTS_PER_SENSOR];
-    bool deviationCheck = false;
 
     for(int checkingSensor = 0; checkingSensor < NUMBER_OF_MEASUREMENTS_PER_SENSOR; checkingSensor++)
     {
@@ -97,55 +123,13 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
                 measurementsPerSensor[checkingSensor] = MAX_DISTANCE;
             }
         }
-
-        //start checking if half of MEASUREMENTS are made.
-        if(checkingSensor == (ceil((float)NUMBER_OF_MEASUREMENTS_PER_SENSOR/2) - 1) && checkingSensor != 0)
-        {
-            deviationCheck = true;
-            U8 distanceCheck = 0;
-
-            for(int i = 0; i <= checkingSensor; i++)
-            {
-                if(measurementsPerSensor[i] > SKIP_MEASUREMENTS_DISTANCE)
-                {
-                    distanceCheck++;
-                }
-            }
-
-            /*
-            if all sensors have measurements above a specified value this step will be skiped. otherwise
-            if will check i all measurements have a deviation bewtween the others below than specified
-            value
-            */
-            if(distanceCheck <= checkingSensor)
-            {
-                for(int a = 0; a <= checkingSensor && deviationCheck == true; a++)
-                {
-                    for(int b = a; b >= 0; b--)
-                    {
-                        if(abs(measurementsPerSensor[a] - measurementsPerSensor[b]) > MAX_DEVIATION_BETWEEN_MEASUREMENTS)
-                        {
-                            deviationCheck = false;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if(deviationCheck == true)
-            {
-                measurements.at(sensorAlignment) = *std::min_element(measurementsPerSensor, measurementsPerSensor + checkingSensor);
-                break;
-            }
-        }
-
-        std::this_thread::sleep_for(std::chrono::microseconds(DELAY_BETWEEN_MEASUREMENTS));
+        std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
 
-    if(deviationCheck == false)
-    {
-        measurements.at(sensorAlignment) = mostFrequent(measurementsPerSensor);
-    }
+    U16 mostFrequentMeasurement = mostFrequent(measurementsPerSensor);
+    std::lock_guard<std::mutex> lock(measurements_mutex);
+    measurements[sensorAlignment].distance = mostFrequentMeasurement;
+    measurements[sensorAlignment].sensorActive = true;
 }
 
 inline U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
@@ -162,7 +146,7 @@ inline U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
         {
             qCritical() << "in DistanceSensors::pulseIn, timeout on LOW state. "
                            "Sensor disconected. sensorAlignment=" << sensorAlignment;
-            return 0;
+            return SENSOR_TIMEOUT;
         }
     }
 
@@ -214,9 +198,62 @@ void DistanceSensors::trigger(const SensorAlignment &sensorAlignment)
 
 void DistanceSensors::setMultiplexerAddress(const U8 &address)
 {
-    for(int i=0; i<NUMBER_OF_ADDRESS_PINS; i++)
+    for(U8 i=0; i<MULTIPLEXER_ADDRESS_PINS.size(); i++)
     {
         bool state = address&static_cast<U8>(0x1 << i);
         digitalWrite(MULTIPLEXER_ADDRESS_PINS[i], state);
+    }
+}
+
+void DistanceSensors::startAndWaitUntilSensorIsActive(std::vector<SensorAlignment> sensorsAlignment)
+{
+    startThread();
+    for(auto sensor : sensorsAlignment)
+    {
+        while(measurements[sensor].sensorActive == false)
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
+        }
+    }
+}
+
+void DistanceSensors::addSensorToQueue(std::vector<SensorAlignment> sensorsAlignment)
+{
+    std::lock_guard<std::mutex> lock(sensorQueue_mutex);
+    stopThread();
+    for(auto sensor : sensorsAlignment)
+    {
+        qInfo() << "in DistanceSensors::addSensorToQueue, adding sensor to queue nr: " << sensor;
+        sensorQueueCounter[sensor]++;
+        qInfo() << "in DistanceSensors::addSensorToQueue, successful added sensor to queue nr: " << sensor;
+    }
+    startAndWaitUntilSensorIsActive(sensorsAlignment);
+}
+
+void DistanceSensors::removeSensorFromQueue(std::vector<SensorAlignment> sensorsAlignment)
+{
+    std::lock_guard<std::mutex> lock(sensorQueue_mutex);
+    stopThread();
+    for(auto sensor : sensorsAlignment)
+    {
+        if(sensorQueueCounter.find(sensor) != sensorQueueCounter.end())
+        {
+            qInfo() << "in DistanceSensors::removeSensorFromQueue, deacreasing sensor counter nr: " << sensor;
+            measurements[sensor].sensorActive = false;
+            sensorQueueCounter[sensor]--;
+            if(sensorQueueCounter[sensor] <= 0)
+            {
+                qInfo() << "in DistanceSensors::removeSensorFromQueue, removing sensor from que nr: " << sensor;
+                sensorQueueCounter.erase(sensorQueueCounter.find(sensor));
+            }
+        }
+        else
+        {
+            qWarning() << "in DistanceSensors::removeSensorFromQueue, sensor not found nr: " << sensor;
+        }
+    }
+    if(sensorQueueCounter.size() > 0)
+    {
+        startThread();
     }
 }

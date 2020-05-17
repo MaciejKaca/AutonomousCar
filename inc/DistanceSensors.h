@@ -3,14 +3,19 @@
 #include "Base/DistanceSensorsBase.h"
 #include <future>
 #include <array>
+#include <cstdint>
 
 class DistanceSensors : DistanceSensorsBase
 {
 public:
     DistanceSensors();
-    const U16 &getDistance(const SensorAlignment &sensorAlignment) override;
-    void stopThread() override;
-    void startThread() override;
+    U16 getDistance(SensorAlignment sensorAlignment) override;
+    void addSensorToQueue(std::vector<SensorAlignment> sensorsAlignment) override;
+    void removeSensorFromQueue(std::vector<SensorAlignment> sensorsAlignment) override;
+
+    static const U8 NUMBER_OF_SENSORS = 8;
+    static const U8 MIN_DISTANCE = 0;
+    static const U16 MAX_DISTANCE = 400;
     ~DistanceSensors();
 private:
     struct EchoTriggerPinsS
@@ -18,20 +23,20 @@ private:
         U8 echoAddress;
         U8 triggerPin;
     };
-    static const U8 NUMBER_OF_SENSORS = 8;
-    const U32 DELAY_BETWEEN_MEASUREMENTS = 300; //microseconds
+    struct SensorState
+    {
+        U16 distance;
+        bool sensorActive;
+    };
+
+    const U32 DELAY_BETWEEN_MEASUREMENTS = 10; //milliseconds
     const U8 TRIGGER_DURATION = 10; //microseconds
     const U16 SENSOR_TIMEOUT = 23260; //microseconds
-    const U8 NUMBER_OF_MEASUREMENTS_PER_SENSOR = 5;
+    const U8 NUMBER_OF_MEASUREMENTS_PER_SENSOR = 3;
     const float SOUND_SPEED = 0.034;
     const U8 COMMON_ECHO = 7;
-    const U8 DISTANCE_THRESHOLD = 3;
-    const U8 MIN_DISTANCE = 0;
-    const U16 MAX_DISTANCE = 400;
-    const U8 MAX_DEVIATION_BETWEEN_MEASUREMENTS = 1;
-    const U8 SKIP_MEASUREMENTS_DISTANCE = 100; //cm
-    static const U8 NUMBER_OF_ADDRESS_PINS = 3;
-    const U8 MULTIPLEXER_ADDRESS_PINS[NUMBER_OF_ADDRESS_PINS] = {1, 4, 5};
+    const U8 DISTANCE_THRESHOLD = 15;
+    const std::array<U8,3> MULTIPLEXER_ADDRESS_PINS{ {1, 4, 5} };
     const std::map<SensorAlignment, EchoTriggerPinsS> DISTANCE_SENSORS_PINS = {{SENSOR_FRONT, {.echoAddress = 7,.triggerPin = 2}},
                                                                                {SENSOR_FRONT_LEFT, {.echoAddress = 5, .triggerPin = 21}},
                                                                                {SENSOR_FRONT_RIGHT, {.echoAddress = 6, .triggerPin = 22}},
@@ -40,9 +45,12 @@ private:
                                                                                {SENSOR_REAR_RIGHT, {.echoAddress = 1, .triggerPin = 25}},
                                                                                {SENSOR_LEFT_SIDE, {.echoAddress = 2, .triggerPin = 23}},
                                                                                {SENSOR_RIGHT_SIDE, {.echoAddress = 0, .triggerPin = 24}}};
-    std::array<U16, NUMBER_OF_SENSORS> measurements;
+    SensorState measurements[NUMBER_OF_SENSORS];
     std::future<void> measurementThread;
-    bool terminateThread;
+    bool isDistanceSensorThreadActive;
+    std::map<SensorAlignment, U16> sensorQueueCounter;
+    std::mutex measurements_mutex;
+    std::mutex sensorQueue_mutex;
 
     void collectMeasurements();
     void makeMeasurement(const SensorAlignment &sensorAlignment);
@@ -50,4 +58,7 @@ private:
     U16 mostFrequent(const U16 array[]);
     void trigger(const SensorAlignment &sensorAlignment);
     void setMultiplexerAddress(const U8 &address);
+    void stopThread();
+    void startThread();
+    void startAndWaitUntilSensorIsActive(std::vector<SensorAlignment> sensorsAlignment);
 };
