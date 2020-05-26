@@ -6,9 +6,10 @@ An autonomous car which is based on Lego 8041 car.
 
 Curent status: The car can be controled with a XBOX One gamepad. All lights are working.
 
-Lights test:           https://streamable.com/difbp
-Distance sensors test: https://streamable.com/b5rykq
-                       https://streamable.com/3n72jt
+Lights test:           https://streamable.com/difbp<br>
+<br>
+Distance sensors test: https://streamable.com/b5rykq<br>
+                       https://streamable.com/3n72jt<br>
 
 ![1](https://i.imgur.com/l622rQk.jpg)
 ![2](https://i.imgur.com/bs08zTe.jpg)
