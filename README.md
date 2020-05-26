@@ -10,6 +10,6 @@ Lights test:           https://streamable.com/difbp
 Distance sensors test: https://streamable.com/b5rykq
                        https://streamable.com/3n72jt
 
-![1](https://www.wykop.pl/cdn/c3201142/comment_1590483470nGk0njq5KYrgssUHu6qgmA.jpg)
+![1](https://i.imgur.com/l622rQk.jpg)
 ![2](https://i.imgur.com/bs08zTe.jpg)
 ![3](https://i.imgur.com/g6bEkmy.jpg)
