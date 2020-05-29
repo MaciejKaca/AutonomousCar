@@ -11,7 +11,7 @@
 #include <inc/steppermotor.h>
 #include <RS-232/rs232.h>
 
-Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
+Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights):
       AXIS_TO_SPEED_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
                           static_cast<float>(_stepperMotor->MAX_SPEED - StepperMotor::MIN_SPEED)),
       AXIS_TO_ANGLE_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
@@ -47,6 +47,8 @@ Gamepad::Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights):
     isReadGamepadInputThreadActive = false;
     isHandleAxisInputsThreadActive = false;
     isHandleButtonInputsThreadActive = false;
+
+    mustAxisReturnToZero.fill(false);
 }
 
 Gamepad::~Gamepad()
@@ -165,6 +167,17 @@ void Gamepad::readGamepadInput()
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(GAMEPAD_REFRESH_TIME));
 
+        if(stepperMotor->getAllowedDirection().forward == false
+                && getAxisValue(RIGHT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
+        {
+            mustAxisReturnToZero[RIGHT_TRIGGER] = true;
+        }
+        if(stepperMotor->getAllowedDirection().backward == false
+                && getAxisValue(LEFT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
+        {
+            mustAxisReturnToZero[LEFT_TRIGGER] = true;
+        }
+
         JoystickEvent event;
         if(joystick->sample(&event))
         {
@@ -215,13 +228,14 @@ void Gamepad::handleButtonInput()
             case X_BUTTON:
                 if(buttonEvent.buttonValue == BUTTON_DOWN)
                 {
-                    lights->setBrakeLights(BRAKE_LIGHT_STOP);
-                    lights->setReverseLight(REVERSE_LIGHT_OFF);
                     stepperMotor->brake();
+                    if(lights->getReverseLightStatus() == REVERSE_LIGHT_ON)
+                    {
+                        lights->setReverseLight(REVERSE_LIGHT_OFF);
+                    }
                 }
                 else
                 {
-                    lights->setBrakeLights(BRAKE_LIGHT_OFF);
                     stepperMotor->switchOff();
 
                     if(getAxisValue(LEFT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
@@ -300,63 +314,50 @@ void Gamepad::handleAxisInput()
         AxisEvent axisEvent = *axisEvents.begin();
         switch (axisEvent.axisID)
         {
-            case RIGHT_TRIGGER:
-                if(!isButtonPressed(X_BUTTON))
+        case RIGHT_TRIGGER:
+            if(!isButtonPressed(X_BUTTON) && stepperMotor->getAllowedDirection().forward && !mustAxisReturnToZero[axisEvent.axisID])
+            {
+                if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
                 {
-                    if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
+                    if(getAxisValue(LEFT_TRIGGER) < AXIS_MIN_TRIGGER_POSITION)
                     {
-                        if(getAxisValue(LEFT_TRIGGER) < AXIS_MIN_TRIGGER_POSITION)
-                        {
-                            stepperMotor->move(DIRECTION_FORWARD, axisToSpeed(axisEvent.axisValue));
-                        }
-                        else
-                        {
-                            if(lights->getReverseLightStatus() == REVERSE_LIGHT_ON)
-                            {
-                                lights->setReverseLight(REVERSE_LIGHT_OFF);
-                            }
-                            if(stepperMotor->getSpeed() > 0)
-                            {
-                                stepperMotor->switchOff();
-                            }
-                        }
+                        stepperMotor->move(DIRECTION_FORWARD, axisToSpeed(axisEvent.axisValue), PRIORITY_MANUAL);
                     }
                     else
                     {
-                        stepperMotor->switchOff();
-                        if(getAxisValue(LEFT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
+                        if(stepperMotor->getSpeed() > 0)
                         {
-                            axisEvents.push_back({LEFT_TRIGGER, getAxisValue(LEFT_TRIGGER)});
+                            stepperMotor->switchOff();
                         }
                     }
                 }
-                break;
-
-            case LEFT_TRIGGER:
-                if(!isButtonPressed(X_BUTTON))
+                else
                 {
-                    if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
+                    stepperMotor->switchOff();
+                    if(getAxisValue(LEFT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
                     {
-                        if(getAxisValue(RIGHT_TRIGGER) < AXIS_MIN_TRIGGER_POSITION)
-                        {
-                            if(lights->getReverseLightStatus() == REVERSE_LIGHT_OFF)
-                            {
-                                lights->setReverseLight(REVERSE_LIGHT_ON);
-                            }
+                        axisEvents.push_back({LEFT_TRIGGER, getAxisValue(LEFT_TRIGGER)});
+                    }
+                }
+            }
+            else
+            {
+                if(axisEvent.axisValue <= AXIS_MIN_TRIGGER_POSITION)
+                {
+                    mustAxisReturnToZero[axisEvent.axisID] = false;
+                }
+            }
+            break;
 
-                            stepperMotor->move(DIRECTION_BACKWARD, axisToSpeed(axisEvent.axisValue));
-                        }
-                        else
-                        {
-                            if(lights->getReverseLightStatus() == REVERSE_LIGHT_ON)
-                            {
-                                lights->setReverseLight(REVERSE_LIGHT_OFF);
-                            }
-                            if(stepperMotor->getSpeed() > 0)
-                            {
-                                stepperMotor->switchOff();
-                            }
-                        }
+        case LEFT_TRIGGER:
+            if(!isButtonPressed(X_BUTTON) && stepperMotor->getAllowedDirection().backward && !mustAxisReturnToZero[axisEvent.axisID])
+            {
+                if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
+                {
+                    if(getAxisValue(RIGHT_TRIGGER) < AXIS_MIN_TRIGGER_POSITION)
+                    {
+
+                        stepperMotor->move(DIRECTION_BACKWARD, axisToSpeed(axisEvent.axisValue), PRIORITY_MANUAL);
                     }
                     else
                     {
@@ -368,49 +369,68 @@ void Gamepad::handleAxisInput()
                         {
                             stepperMotor->switchOff();
                         }
-                        if(getAxisValue(RIGHT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
-                        {
-                            axisEvents.push_back({RIGHT_TRIGGER, getAxisValue(RIGHT_TRIGGER)});
-                        }
                     }
                 }
-                break;
-
-            case LEFT_X_AXIS:
-                servo->turn(axisToDegrees(axisEvent.axisValue));
-                break;
-
-            case ARROW_Y_AXIS:
-                if(axisEvent.axisValue > 0) //Arrow DOWN
+                else
                 {
-                    if(lights->getBrakeLightsWhenOffStatus() != BRAKE_LIGHT_DAYTIME)
+                    if(lights->getReverseLightStatus() == REVERSE_LIGHT_ON)
                     {
-                        lights->setBrakeLightsWhenOff(BRAKE_LIGHT_DAYTIME);
+                        lights->setReverseLight(REVERSE_LIGHT_OFF);
                     }
-                    else
+                    if(stepperMotor->getSpeed() > 0)
                     {
-                        lights->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
+                        stepperMotor->switchOff();
+                    }
+                    if(getAxisValue(RIGHT_TRIGGER) > AXIS_MIN_TRIGGER_POSITION)
+                    {
+                        axisEvents.push_back({RIGHT_TRIGGER, getAxisValue(RIGHT_TRIGGER)});
                     }
                 }
-                else if(axisEvent.axisValue < 0) //Arrow UP
+            }
+            else
+            {
+                if(axisEvent.axisValue <= AXIS_MIN_TRIGGER_POSITION)
                 {
-                    if(lights->getHeadLightStatus() == HEADLIGHT_OFF)
-                    {
-                        lights->setHeadLight(HEADLIGHT_DAYTIME);
-                    }
-                    else if(lights->getHeadLightStatus() == HEADLIGHT_DAYTIME)
-                    {
-                        lights->setHeadLight(HEADLIGHT_HIGH_BEAM);
-                    }
-                    else if(lights->getHeadLightStatus() == HEADLIGHT_HIGH_BEAM)
-                    {
-                        lights->setHeadLight(HEADLIGHT_OFF);
-                    }
+                    mustAxisReturnToZero[axisEvent.axisID] = false;
                 }
-                break;
+            }
+            break;
 
-            default:
-                break;
+        case LEFT_X_AXIS:
+            servo->turn(axisToDegrees(axisEvent.axisValue), PRIORITY_MANUAL);
+            break;
+
+        case ARROW_Y_AXIS:
+            if(axisEvent.axisValue > 0) //Arrow DOWN
+            {
+                if(lights->getBrakeLightsWhenOffStatus() != BRAKE_LIGHT_DAYTIME)
+                {
+                    lights->setBrakeLightsWhenOff(BRAKE_LIGHT_DAYTIME);
+                }
+                else
+                {
+                    lights->setBrakeLightsWhenOff(BRAKE_LIGHT_OFF);
+                }
+            }
+            else if(axisEvent.axisValue < 0) //Arrow UP
+            {
+                if(lights->getHeadLightStatus() == HEADLIGHT_OFF)
+                {
+                    lights->setHeadLight(HEADLIGHT_DAYTIME);
+                }
+                else if(lights->getHeadLightStatus() == HEADLIGHT_DAYTIME)
+                {
+                    lights->setHeadLight(HEADLIGHT_HIGH_BEAM);
+                }
+                else if(lights->getHeadLightStatus() == HEADLIGHT_HIGH_BEAM)
+                {
+                    lights->setHeadLight(HEADLIGHT_OFF);
+                }
+            }
+            break;
+
+        default:
+            break;
         }
         axisState[axisEvent.axisID] = axisEvent.axisValue;
         axisEvents.erase(axisEvents.begin());

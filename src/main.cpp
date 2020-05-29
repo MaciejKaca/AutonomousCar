@@ -4,6 +4,8 @@
 #include <inc/lights.h>
 #include <inc/logutils.h>
 #include <inc/DistanceSensors.h>
+#include <inc/SafetySystem.h>
+#include <inc/StepperMotorShell.h>
 #include <wiringPi.h>
 
 #include <future>
@@ -17,17 +19,19 @@ int main()
     Servo* servo;
     Lights* lights;
     Gamepad* gamepad;
-    StepperMotor* stepperMotor;
+    StepperMotorShell* stepperMotorShell;
     DistanceSensors *distanceSensors;
+    SafetySystem *safetySystems;
 
     try
     {
         lightsAndServoSerial = new SerialPort();
-        stepperMotor =  new StepperMotor();
         distanceSensors = new DistanceSensors();
-        servo = new Servo(lightsAndServoSerial, stepperMotor);
         lights = new Lights(lightsAndServoSerial);
-        gamepad = new Gamepad(stepperMotor, servo, lights);
+        stepperMotorShell =  new StepperMotorShell(lights);
+        servo = new Servo(lightsAndServoSerial, stepperMotorShell);
+        safetySystems = new SafetySystem(servo, stepperMotorShell, distanceSensors);
+        gamepad = new Gamepad(stepperMotorShell, servo, lights);
     }
     catch(ExitReason excp)
     {
@@ -38,7 +42,8 @@ int main()
             delete lights;
             delete servo;
             delete lightsAndServoSerial;
-            delete stepperMotor;
+            delete stepperMotorShell;
+            delete safetySystems;
             break;
         default:
             break;
@@ -48,7 +53,7 @@ int main()
 
     try
     {
-        distanceSensors->startThread();
+        stepperMotorShell->setSafetySystem(safetySystems);
         gamepad->startThread();
         gamepad->waitForExitButton();
     }
@@ -58,22 +63,24 @@ int main()
         switch(excp)
         {
         default:
+            delete safetySystems;
             delete distanceSensors;
             delete lights;
             delete servo;
             delete lightsAndServoSerial;
-            delete stepperMotor;
+            delete stepperMotorShell;
             delete gamepad;
             break;
         }
         return excp;
     }
 
+    delete safetySystems;
     delete lights;
     delete servo;
     delete lightsAndServoSerial;
     delete distanceSensors;
-    delete stepperMotor;
+    delete stepperMotorShell;
     delete gamepad;
 
     return 0;

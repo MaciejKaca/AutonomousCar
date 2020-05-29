@@ -1,7 +1,7 @@
 #pragma once
 
 #include <inc/common.h>
-#include <inc/steppermotor.h>
+#include <inc/StepperMotorShell.h>
 #include <inc/servo.h>
 #include <inc/lights.h>
 #include <joystick/joystick.hh>
@@ -16,7 +16,7 @@ class Gamepad
     friend class GamepadTest;
 
     public:
-        Gamepad(StepperMotor *_stepperMotor, Servo *_servo, Lights *_lights);
+        Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights);
         void startThread();
         void stopThread();
         void waitForExitButton();
@@ -40,11 +40,11 @@ class Gamepad
         const float AXIS_TO_ANGLE_SCALE;
         const S16 AXIS_MIN_TRIGGER_POSITION;
         const U8 GAMEPAD_REFRESH_TIME = 1;
-        const U8 NUMBER_OF_BUTTONS = 10;
-        const U8 NUMBER_OF_AXIS = 7;
+        static const U8 NUMBER_OF_BUTTONS = 10;
+        static const U8 NUMBER_OF_AXIS = 8;
 
         Joystick *joystick;
-        StepperMotor *stepperMotor;
+        StepperMotorShell *stepperMotor;
         Servo *servo;
         Lights *lights;
 
@@ -64,6 +64,7 @@ class Gamepad
         std::map<AxisID, short> axisState;
         std::vector<ButtonEvent> buttonEvents;
         std::vector<AxisEvent> axisEvents;
+        std::array<bool, NUMBER_OF_AXIS> mustAxisReturnToZero;
 
         void handleButtonInput();
         void handleAxisInput();

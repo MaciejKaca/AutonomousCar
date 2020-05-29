@@ -103,40 +103,59 @@ void DistanceSensors::makeMeasurement(const SensorAlignment &sensorAlignment)
 
     for(int checkingSensor = 0; checkingSensor < NUMBER_OF_MEASUREMENTS_PER_SENSOR; checkingSensor++)
     {
+        U8 echoAddress = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoAddress;
+        setMultiplexerAddress(echoAddress);
         trigger(sensorAlignment);
 
         U32 duration = pulseIn(sensorAlignment);
-        U16 distance = ceil((duration/2)*SOUND_SPEED);
-
-        if(distance != 0)
+        if(duration != SENSOR_TIMEOUT)
         {
-            measurementsPerSensor[checkingSensor] = distance;
-        }
-        else
-        {
-            if(getDistance(sensorAlignment) <= DISTANCE_THRESHOLD)
+            U16 distance = ceil((duration/2)*SOUND_SPEED);
+            if(distance != 0)
             {
-                measurementsPerSensor[checkingSensor] = MIN_DISTANCE;
+                measurementsPerSensor[checkingSensor] = distance;
             }
             else
             {
-                measurementsPerSensor[checkingSensor] = MAX_DISTANCE;
+                if(getDistance(sensorAlignment) <= DISTANCE_THRESHOLD)
+                {
+                    measurementsPerSensor[checkingSensor] = MIN_DISTANCE;
+                }
+                else
+                {
+                    measurementsPerSensor[checkingSensor] = MAX_DISTANCE;
+                }
             }
+        }
+        else
+        {
+            std::lock_guard<std::mutex> lock(measurements_mutex);
+            measurementsPerSensor[checkingSensor] = measurements[sensorAlignment].distance;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
     }
 
-    U16 mostFrequentMeasurement = mostFrequent(measurementsPerSensor);
     std::lock_guard<std::mutex> lock(measurements_mutex);
-    measurements[sensorAlignment].distance = mostFrequentMeasurement;
+    measurements[sensorAlignment].distance = ceil(std::accumulate(measurementsPerSensor, measurementsPerSensor +
+                                                             NUMBER_OF_MEASUREMENTS_PER_SENSOR, 0.0) /
+                                                             NUMBER_OF_MEASUREMENTS_PER_SENSOR);
+    if(sensorAlignment == SENSOR_FRONT)
+    {
+        if(measurements[sensorAlignment].distance <= FRONT_SENSOR_OFFSET)
+        {
+            measurements[sensorAlignment].distance = 0;
+        }
+        else
+        {
+            measurements[sensorAlignment].distance-=FRONT_SENSOR_OFFSET;
+        }
+    }
+
     measurements[sensorAlignment].sensorActive = true;
 }
 
 inline U32 DistanceSensors::pulseIn(const SensorAlignment &sensorAlignment)
 {
-    U8 echoAddress = DISTANCE_SENSORS_PINS.find(sensorAlignment)->second.echoAddress;
-    setMultiplexerAddress(echoAddress);
-
     auto timeUntilTimeout = std::chrono::steady_clock::now();
     while(digitalRead(COMMON_ECHO) == LOW)
     {
@@ -214,6 +233,7 @@ void DistanceSensors::startAndWaitUntilSensorIsActive(std::vector<SensorAlignmen
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(DELAY_BETWEEN_MEASUREMENTS));
         }
+        qInfo() << "in DistanceSensors::startAndWaitUntilSensorIsActive, sensor active nr: " << sensor;
     }
 }
 

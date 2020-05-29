@@ -10,7 +10,6 @@ public:
     ~SerialPort();
     void send(U8 *buffer,const S16 &size) override;
     void read(U8 *buffer,const S16 &size) override;
-    const bool &isSerialOpen();
 
 private:
     bool serialStatus;
@@ -18,5 +17,7 @@ private:
     const S16 CPORT_NR_BASE;
     const S16 CPORT_NR_BACKUP;
     const S16 BAUD_RATE = 9600;
+
     void open_comport();
+    std::mutex send_mutex;
 };

@@ -43,8 +43,6 @@ enum StepperMotorDirection
 {
     DIRECTION_FORWARD = 0,
     DIRECTION_BACKWARD = 1,
-    DIRECTION_BOTH = 2,
-    DIRECTION_BLOCK_ALL = 3
 };
 
 enum ButtonID
@@ -74,4 +72,17 @@ enum SensorAlignment
     SENSOR_REAR_RIGHT = 5,
     SENSOR_LEFT_SIDE = 6,
     SENSOR_RIGHT_SIDE = 7
+};
+
+struct AllowedDirection
+{
+    bool forward;
+    bool backward;
+};
+
+enum ControlPiority
+{
+    PRIORITY_AUTOPILOT = 0,
+    PRIORITY_MANUAL = 1,
+    PRIORITY_SAFETYSYSTEM = 3
 };

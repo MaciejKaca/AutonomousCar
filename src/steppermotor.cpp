@@ -19,7 +19,7 @@ StepperMotor::StepperMotor()
     pinMode(STEPPER_STEP_PIN, OUTPUT);
 
     digitalWrite(STEPPER_DIRECTION_PIN, LOW);
-    digitalWrite(STEPPER_ENABLE_PIN, LOW);
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH); // !E
     digitalWrite(STEPPER_STEP_PIN, LOW);
 
     speed = 0;
@@ -37,22 +37,10 @@ StepperMotor::~StepperMotor()
     switchOff();
 }
 
-bool StepperMotor::validateSpeed(const U16 &_speed)
-{
-    if(_speed > MAX_SPEED || _speed <= MIN_SPEED)
-    {
-        qWarning() << "in StepperMotor::validateSpeed(): speed out of range = " << _speed;
-        return false;
-    }
-    else
-    {
-        return true;
-    }
-}
-
-bool StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _speed)
+void StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _speed)
 {
     U16 delay = MAX_DELAY - _speed*((MAX_DELAY-MIN_DELAY)/(MAX_SPEED-MIN_SPEED));
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
 
     if(_direction == DIRECTION_FORWARD)
     {
@@ -63,14 +51,10 @@ bool StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _s
         digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
 
-    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
-
     digitalWrite(STEPPER_STEP_PIN, HIGH);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
     digitalWrite(STEPPER_STEP_PIN, LOW);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
-
-    return true;
 }
 
 void StepperMotor::brake()
@@ -80,7 +64,7 @@ void StepperMotor::brake()
     stopThread();
     speed = 0;
     desiredSpeed = 0;
-    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
 void StepperMotor::switchOff()
@@ -90,7 +74,7 @@ void StepperMotor::switchOff()
     stopThread();
     speed = 0;
     desiredSpeed = 0;
-    digitalWrite(STEPPER_ENABLE_PIN, LOW);
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
 void StepperMotor::constantMovement()
@@ -105,13 +89,10 @@ void StepperMotor::constantMovement()
 
 void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _speed)
 {
-    if(validateSpeed(_speed))
-    {
-        desiredSpeed = _speed;
-        direction = _direction;
+    desiredSpeed = _speed;
+    direction = _direction;
 
-        launchThread();
-    }
+    launchThread();
 }
 
 const double& StepperMotor::getSpeed()

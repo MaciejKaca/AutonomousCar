@@ -18,10 +18,6 @@ SerialPort::~SerialPort()
 
 SerialPortBase::~SerialPortBase(){}
 
-const bool &SerialPort::isSerialOpen()
-{
-    return serialStatus;
-}
 
 void SerialPort::open_comport()
 {
@@ -33,26 +29,24 @@ void SerialPort::open_comport()
         if(RS232_OpenComport(CPORT_NR_BACKUP, BAUD_RATE, mode))
         {
             qCritical("in SerialPort::open_comport(): missing arduino on backup.");
-            serialStatus = false;
             throw EXIT_BY_MISSING_MODULE;
         }
         else
         {
             CPORT_NR = CPORT_NR_BACKUP;
-            serialStatus = true;
             qWarning("in SerialPort::open_comport(): Arduino found on bakcup");
         }
     }
     else
     {
         CPORT_NR = CPORT_NR_BASE;
-        serialStatus = true;
         qInfo("in SerialPort::open_comport(): Arduino found");
     }
 }
 
 void SerialPort::send(U8 * buffer,const S16 &size)
 {
+    std::lock_guard<std::mutex> lock(send_mutex);
     if(!(RS232_SendBuf(CPORT_NR, buffer, size) > 0))
     {
         qCritical("in SerialPort::send(): failed");

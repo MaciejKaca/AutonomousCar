@@ -1,22 +1,23 @@
 #include <inc/servo.h>
 #include <unistd.h>
 #include <thread>
+#include <mutex>
 
-Servo::Servo(SerialPort* _serialPort, StepperMotor* _stepperMotor) : serialPort(_serialPort), stepperMotor(_stepperMotor)
+#include <inc/StepperMotorShell.h>
+
+Servo::Servo(SerialPort* _serialPort, StepperMotorShell* _stepperMotor) : serialPort(_serialPort), stepperMotor(_stepperMotor)
 {
     qInfo("in Servo, initializing constructor");
     angle = 0;
     cancelCenter = false;
+    controlPriority = PRIORITY_MANUAL;
     centerWheelsThread = std::async(std::launch::async, &Servo::addOffset, this);
 }
 
 Servo::~Servo()
 {
     qInfo("in Servo::~Servo, destructor called");
-    if(serialPort->isSerialOpen())
-    {
-        this->turn(0);
-    }
+    this->turn(0);
 }
 
 ServoBase::~ServoBase(){}
@@ -111,6 +112,15 @@ void Servo::turn(const S8 &_angle)
     }
 }
 
+void Servo::turn(const S8 &_angle, ControlPiority _controlPriority)
+{
+    std::lock_guard<std::mutex> lock(controlPriority_mutex);
+    if(_controlPriority >= controlPriority)
+    {
+        turn(_angle);
+    }
+}
+
 void Servo::setNewCenter(const S8 &_angle)
 {
     if(validateAngle(_angle))
@@ -141,4 +151,11 @@ bool Servo::validateAngle(const S8 _angle)
         qWarning() << "in Servo::validateAngle(): Angle out of range = " << _angle;
         return false;
     }
+}
+
+void Servo::setPriority(ControlPiority _controlPriority)
+{
+    std::lock_guard<std::mutex> lock(controlPriority_mutex);
+    controlPriority = _controlPriority;
+    qInfo() << "in Servo::~setPriority, priority set to: " << controlPriority;
 }
