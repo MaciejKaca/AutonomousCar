@@ -36,6 +36,7 @@ SOURCES += \
         src/servo.cpp \
         src/lights.cpp \
         src/logutils.cpp \
+        src/SettingsWindow.cpp \
 
 HEADERS += \
         inc/Base/* \
@@ -53,6 +54,10 @@ HEADERS += \
         inc/gamepad.h \
         CarInterface/interface.h \
         RS-232/rs232.h \
+        inc/SettingsWindow.h \
+
+FORMS += \
+        Forms/SettingsWindow.ui \
 
 target.path = /home/pi
 INSTALLS += target

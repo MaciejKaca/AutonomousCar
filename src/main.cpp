@@ -7,12 +7,18 @@
 #include <inc/SafetySystem.h>
 #include <inc/StepperMotorShell.h>
 #include <wiringPi.h>
+#include <inc/SettingsWindow.h>
+#include <QApplication>
 
-#include <future>
-
-int main()
+int main(int argc, char *argv[])
 {
     LOGUTILS::initLogging(false);
+
+    QApplication settingsApp(argc, argv);
+    SettingsWindow settingsWindow;
+    settingsWindow.show();
+    settingsApp.exec();
+
     wiringPiSetup();
 
     SerialPort* lightsAndServoSerial;
