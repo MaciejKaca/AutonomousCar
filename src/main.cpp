@@ -1,3 +1,6 @@
+#include <QApplication>
+#include <wiringPi.h>
+
 #include <inc/gamepad.h>
 #include <inc/serialport.h>
 #include <inc/servo.h>
@@ -6,9 +9,7 @@
 #include <inc/DistanceSensors.h>
 #include <inc/SafetySystem.h>
 #include <inc/StepperMotorShell.h>
-#include <wiringPi.h>
 #include <inc/SettingsWindow.h>
-#include <QApplication>
 
 int main(int argc, char *argv[])
 {

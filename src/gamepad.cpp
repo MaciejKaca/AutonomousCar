@@ -34,15 +34,20 @@ Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_light
     servo = _servo;
     lights = _lights;
 
-    buttonState[ButtonID::X_BUTTON] = BUTTON_UP;
-    buttonState[ButtonID::EXIT_BUTTON] = BUTTON_UP;
-    buttonState[ButtonID::LEFT_BUMPER] = BUTTON_UP;
-    buttonState[ButtonID::RIGHT_BUMPER] = BUTTON_UP;
+    buttonMapping[settings.getExitButtonId()] = EXIT_BUTTON;
+    buttonMapping[settings.getBrakeButtonId()] = BRAKE_BUTTON;
+    buttonMapping[settings.getLeftBlinkerButtonId()] = LEFT_BLINKER_BUTTON;
+    buttonMapping[settings.getRightBlinkerButtonId()] = RIGHT_BLINKER_BUTTON;
 
-    axisState[AxisID::LEFT_X_AXIS] = 0;
-    axisState[AxisID::ARROW_Y_AXIS] = 0;
-    axisState[AxisID::LEFT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
-    axisState[AxisID::RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
+    buttonState[BRAKE_BUTTON] = BUTTON_UP;
+    buttonState[EXIT_BUTTON] = BUTTON_UP;
+    buttonState[LEFT_BLINKER_BUTTON] = BUTTON_UP;
+    buttonState[RIGHT_BLINKER_BUTTON] = BUTTON_UP;
+
+    axisState[LEFT_X_AXIS] = 0;
+    axisState[ARROW_Y_AXIS] = 0;
+    axisState[LEFT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
+    axisState[RIGHT_TRIGGER] = JoystickEvent::MIN_AXES_VALUE;
 
     isReadGamepadInputThreadActive = false;
     isHandleAxisInputsThreadActive = false;
@@ -183,16 +188,21 @@ void Gamepad::readGamepadInput()
         {
             if(event.isButton())
             {
-                buttonState[ButtonID(event.number)] = bool(event.value);
-                buttonEvents.push_back({ButtonID(event.number), bool(event.value)});
+                auto button = buttonMapping.find(event.number);
+                if(button != buttonMapping.end())
+                {
+                    ButtonName buttonName = button->second;
 
-                launchHandleButtonInputThread();
+                    buttonState[buttonName] = bool(event.value);
+                    buttonEvents.push_back({buttonName, bool(event.value)});
 
+                    launchHandleButtonInputThread();
+                }
             }
             else if (event.isAxis())
             {
-                axisState[AxisID(event.number)] = event.value;
-                axisEvents.push_back({AxisID(event.number), event.value});
+                axisState[AxisName(event.number)] = event.value;
+                axisEvents.push_back({AxisName(event.number), event.value});
 
                 launchHandleAxisInputThread();
             }
@@ -200,14 +210,14 @@ void Gamepad::readGamepadInput()
     }
 }
 
-const bool &Gamepad::isButtonPressed(const ButtonID &buttonID)
+const bool &Gamepad::isButtonPressed(const ButtonName &buttonName)
 {
-    return buttonState.find(buttonID)->second;
+    return buttonState.find(buttonName)->second;
 }
 
-const short &Gamepad::getAxisValue(const AxisID &axisID)
+const short &Gamepad::getAxisValue(const AxisName &axisName)
 {
-    return axisState.find(axisID)->second;
+    return axisState.find(axisName)->second;
 }
 
 void Gamepad::handleButtonInput()
@@ -215,7 +225,7 @@ void Gamepad::handleButtonInput()
     while(buttonEvents.size() > 0 && isReadGamepadInputThreadActive)
     {
         ButtonEvent buttonEvent = *buttonEvents.begin();
-        switch (buttonEvent.buttonID)
+        switch (buttonEvent.buttonName)
         {
             case EXIT_BUTTON:
                 if(buttonEvent.buttonValue == BUTTON_DOWN)
@@ -225,7 +235,7 @@ void Gamepad::handleButtonInput()
                 }
                 break;
 
-            case X_BUTTON:
+            case BRAKE_BUTTON:
                 if(buttonEvent.buttonValue == BUTTON_DOWN)
                 {
                     stepperMotor->brake();
@@ -251,10 +261,10 @@ void Gamepad::handleButtonInput()
                 }
                 break;
 
-            case RIGHT_BUMPER:
+            case RIGHT_BLINKER_BUTTON:
                 if(buttonEvent.buttonValue == BUTTON_DOWN)
                 {
-                    if(!isButtonPressed(LEFT_BUMPER))
+                    if(!isButtonPressed(LEFT_BLINKER_BUTTON))
                     {
                         if(lights->getTurnSignalStatus() != TURN_SIGNAL_RIGHT && lights->getTurnSignalStatus() != HAZARD_LIGHTS)
                         {
@@ -275,10 +285,10 @@ void Gamepad::handleButtonInput()
                 }
                 break;
 
-            case LEFT_BUMPER:
+            case LEFT_BLINKER_BUTTON:
                 if(buttonEvent.buttonValue == BUTTON_DOWN)
                 {
-                    if(!isButtonPressed(RIGHT_BUMPER))
+                    if(!isButtonPressed(RIGHT_BLINKER_BUTTON))
                     {
                         if(lights->getTurnSignalStatus() != TURN_SIGNAL_LEFT && lights->getTurnSignalStatus() != HAZARD_LIGHTS)
                         {
@@ -302,7 +312,7 @@ void Gamepad::handleButtonInput()
             default:
                 break;
         }
-        buttonState[buttonEvent.buttonID] = buttonEvent.buttonValue;
+        buttonState[buttonEvent.buttonName] = buttonEvent.buttonValue;
         buttonEvents.erase(buttonEvents.begin());
     }
 }
@@ -312,10 +322,10 @@ void Gamepad::handleAxisInput()
     while(axisEvents.size() > 0 && isReadGamepadInputThreadActive)
     {
         AxisEvent axisEvent = *axisEvents.begin();
-        switch (axisEvent.axisID)
+        switch (axisEvent.axisName)
         {
         case RIGHT_TRIGGER:
-            if(!isButtonPressed(X_BUTTON) && stepperMotor->getAllowedDirection().forward && !mustAxisReturnToZero[axisEvent.axisID])
+            if(!isButtonPressed(BRAKE_BUTTON) && stepperMotor->getAllowedDirection().forward && !mustAxisReturnToZero[axisEvent.axisName])
             {
                 if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
                 {
@@ -344,13 +354,13 @@ void Gamepad::handleAxisInput()
             {
                 if(axisEvent.axisValue <= AXIS_MIN_TRIGGER_POSITION)
                 {
-                    mustAxisReturnToZero[axisEvent.axisID] = false;
+                    mustAxisReturnToZero[axisEvent.axisName] = false;
                 }
             }
             break;
 
         case LEFT_TRIGGER:
-            if(!isButtonPressed(X_BUTTON) && stepperMotor->getAllowedDirection().backward && !mustAxisReturnToZero[axisEvent.axisID])
+            if(!isButtonPressed(BRAKE_BUTTON) && stepperMotor->getAllowedDirection().backward && !mustAxisReturnToZero[axisEvent.axisName])
             {
                 if(axisEvent.axisValue > AXIS_MIN_TRIGGER_POSITION)
                 {
@@ -391,7 +401,7 @@ void Gamepad::handleAxisInput()
             {
                 if(axisEvent.axisValue <= AXIS_MIN_TRIGGER_POSITION)
                 {
-                    mustAxisReturnToZero[axisEvent.axisID] = false;
+                    mustAxisReturnToZero[axisEvent.axisName] = false;
                 }
             }
             break;
@@ -432,7 +442,7 @@ void Gamepad::handleAxisInput()
         default:
             break;
         }
-        axisState[axisEvent.axisID] = axisEvent.axisValue;
+        axisState[axisEvent.axisName] = axisEvent.axisValue;
         axisEvents.erase(axisEvents.begin());
     }
 }

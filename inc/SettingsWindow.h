@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "common.h"
+#include "FileHandling.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class SettingsWindow; }
@@ -41,6 +42,7 @@ private:
     Joystick* joystick;
     bool isInputThreadActive;
     std::vector<QCommandLinkButton*> buttons;
+    FileHandling file;
 
     inline bool isGamepadConnected();
     void assignButton();

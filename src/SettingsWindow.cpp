@@ -14,6 +14,11 @@ SettingsWindow::SettingsWindow(QWidget *parent)
     buttons.push_back(ui->leftBlinkerButton_button);
     buttons.push_back(ui->rightBlinkerButton_button);
 
+    ui->exitButton_button->setDescription(QString::number(file.getExitButtonId()));
+    ui->brakeButton_button->setDescription(QString::number(file.getBrakeButtonId()));
+    ui->leftBlinkerButton_button->setDescription(QString::number(file.getLeftBlinkerButtonId()));
+    ui->rightBlinkerButton_button->setDescription(QString::number(file.getRightBlinkerButtonId()));
+
     focusedButton = nullptr;
     isInputThreadActive = true;
     joystick = new Joystick();
@@ -22,10 +27,6 @@ SettingsWindow::SettingsWindow(QWidget *parent)
 
 SettingsWindow::~SettingsWindow()
 {
-    isInputThreadActive = false;
-    inputThread.get();
-    delete ui;
-    delete joystick;
 }
 
 void SettingsWindow::on_exitButton_button_clicked()
@@ -114,5 +115,15 @@ void SettingsWindow::clearInput()
 
 void SettingsWindow::on_save_button_clicked()
 {
+    file.setExitButtonId(ui->exitButton_button->description().toLong());
+    file.setBrakeButtonId(ui->brakeButton_button->description().toLong());
+    file.setLeftBlinkerButtonId(ui->leftBlinkerButton_button->description().toLong());
+    file.setRightBlinkerButtonId(ui->rightBlinkerButton_button->description().toLong());
+
+    isInputThreadActive = false;
+    inputThread.get();
+    delete ui;
+    delete joystick;
+
     this->close();
 }

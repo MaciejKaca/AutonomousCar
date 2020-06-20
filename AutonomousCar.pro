@@ -25,6 +25,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         src/DistanceSensors.cpp \
+    src/FileHandling.cpp \
         src/SafetySystem.cpp \
     src/StepperMotorShell.cpp \
         src/main.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
         inc/Base/SafetySystemBase.h \
     inc/Base/StepperMotorShellBase.h \
         inc/DistanceSensors.h \
+    inc/FileHandling.h \
         inc/SafetySystem.h \
     inc/StepperMotorShell.h \
         inc/common.h \

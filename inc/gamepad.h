@@ -4,6 +4,7 @@
 #include <inc/StepperMotorShell.h>
 #include <inc/servo.h>
 #include <inc/lights.h>
+#include <inc/FileHandling.h>
 #include <joystick/joystick.hh>
 
 #include <unistd.h>
@@ -25,13 +26,13 @@ class Gamepad
     private:
         struct ButtonEvent
         {
-            ButtonID buttonID;
+            ButtonName buttonName;
             bool buttonValue;
         };
 
         struct AxisEvent
         {
-            AxisID axisID;
+            AxisName axisName;
             short axisValue;
         };
 
@@ -40,6 +41,7 @@ class Gamepad
         const float AXIS_TO_ANGLE_SCALE;
         const S16 AXIS_MIN_TRIGGER_POSITION;
         const U8 GAMEPAD_REFRESH_TIME = 1;
+
         static const U8 NUMBER_OF_BUTTONS = 10;
         static const U8 NUMBER_OF_AXIS = 8;
 
@@ -47,6 +49,7 @@ class Gamepad
         StepperMotorShell *stepperMotor;
         Servo *servo;
         Lights *lights;
+        FileHandling settings;
 
         bool isReadGamepadInputThreadActive;
         bool isHandleButtonInputsThreadActive;
@@ -60,11 +63,13 @@ class Gamepad
         bool isGamepadConnected();
         U16 axisToSpeed(const S16 &axisValue);
         S8 axisToDegrees(const S16 &axisValue);
-        std::map<ButtonID, bool> buttonState;
-        std::map<AxisID, short> axisState;
+
+        std::map<ButtonName, bool> buttonState;
+        std::map<AxisName, short> axisState;
         std::vector<ButtonEvent> buttonEvents;
         std::vector<AxisEvent> axisEvents;
         std::array<bool, NUMBER_OF_AXIS> mustAxisReturnToZero;
+        std::map<U8, ButtonName> buttonMapping;
 
         void handleButtonInput();
         void handleAxisInput();
@@ -72,6 +77,6 @@ class Gamepad
         void launchHandleAxisInputThread();
         void readGamepadInput();
 
-        const bool &isButtonPressed(const ButtonID &buttonID);
-        const short &getAxisValue(const AxisID &axisID);
+        const bool &isButtonPressed(const ButtonName &buttonName);
+        const short &getAxisValue(const AxisName &axisName);
 };

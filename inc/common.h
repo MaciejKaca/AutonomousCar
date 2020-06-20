@@ -45,16 +45,15 @@ enum StepperMotorDirection
     DIRECTION_BACKWARD = 1,
 };
 
-enum ButtonID
+enum ButtonName
 {
-    EXIT_BUTTON = 7,
-    X_BUTTON = 2,
-    A_BUTTON = 0,
-    RIGHT_BUMPER = 5,
-    LEFT_BUMPER = 4
-    };
+    EXIT_BUTTON = 0,
+    BRAKE_BUTTON = 1,
+    LEFT_BLINKER_BUTTON = 2,
+    RIGHT_BLINKER_BUTTON = 3
+};
 
-enum AxisID
+enum AxisName
 {
     LEFT_X_AXIS = 0,
     RIGHT_TRIGGER = 4,
