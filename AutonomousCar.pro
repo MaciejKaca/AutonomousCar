@@ -25,9 +25,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         src/DistanceSensors.cpp \
-    src/FileHandling.cpp \
+        src/FileHandling.cpp \
+    src/IMU.cpp \
+        src/MPU9255.cpp \
         src/SafetySystem.cpp \
-    src/StepperMotorShell.cpp \
+        src/StepperMotorShell.cpp \
         src/main.cpp \
         joystick/joystick.cc \
         src/gamepad.cpp \
@@ -38,15 +40,19 @@ SOURCES += \
         src/lights.cpp \
         src/logutils.cpp \
         src/SettingsWindow.cpp \
+        src/RTIMUHal.cpp \
 
 HEADERS += \
+    inc/AHRS.h \
         inc/Base/* \
         inc/Base/SafetySystemBase.h \
-    inc/Base/StepperMotorShellBase.h \
+        inc/Base/StepperMotorShellBase.h \
         inc/DistanceSensors.h \
-    inc/FileHandling.h \
+        inc/FileHandling.h \
+    inc/IMU.h \
+        inc/MPU9255.h \
         inc/SafetySystem.h \
-    inc/StepperMotorShell.h \
+        inc/StepperMotorShell.h \
         inc/common.h \
         inc/steppermotor.h \
         inc/serialport.h \
@@ -57,6 +63,7 @@ HEADERS += \
         CarInterface/interface.h \
         RS-232/rs232.h \
         inc/SettingsWindow.h \
+        inc/RTIMUHal.h \
 
 FORMS += \
         Forms/SettingsWindow.ui \
