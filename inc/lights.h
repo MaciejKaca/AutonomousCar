@@ -2,21 +2,25 @@
 
 #include "common.h"
 #include "serialport.h"
+#include "Base/LightsBase.h"
 
-class Lights
+class Lights : LightsBase
 {
-public:
-    Lights(SerialPort * _serialPort);
-    TurnSignalCommand getTurnSignalStatus();
-    HeadLightCommand getHeadLightStatus();
-    BrakeLightsCommand getBrakeLightsStatus();
-    ReverseLightCommand getReverseLightStatus();
 
-    void setTurnSignal(const TurnSignalCommand command);
-    void setHeadLight(const HeadLightCommand command);
-    void setBrakeLights(const BrakeLightsCommand command);
-    void setBrakeLightsWhenOff(const BrakeLightsCommand command);
-    void setReverseLight(const ReverseLightCommand command);
+public:
+    Lights(SerialPort *_serialPort);
+    ~Lights();
+    const TurnSignalCommand &getTurnSignalStatus() override;
+    const HeadLightCommand &getHeadLightStatus() override;
+    const BrakeLightsCommand &getBrakeLightsStatus() override;
+    const ReverseLightCommand &getReverseLightStatus() override;
+    const BrakeLightsCommand &getBrakeLightsWhenOffStatus() override;
+
+    void setTurnSignal(const TurnSignalCommand &command) override;
+    void setHeadLight(const HeadLightCommand &command) override;
+    void setBrakeLights(const BrakeLightsCommand &command) override;
+    void setBrakeLightsWhenOff(const BrakeLightsCommand &command) override;
+    void setReverseLight(const ReverseLightCommand &command) override;
 
 private:
     SerialPort * serialPort;

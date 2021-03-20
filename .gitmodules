@@ -7,3 +7,6 @@
 [submodule "joystick"]
 	path = joystick
 	url = https://github.com/drewnoakes/joystick.git
+[submodule "Tests/googletest"]
+	path = Tests/googletest
+	url = https://github.com/google/googletest.git

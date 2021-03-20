@@ -24,6 +24,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+        src/DistanceSensors.cpp \
+        src/FileHandling.cpp \
+    src/IMU.cpp \
+        src/MPU9255.cpp \
+        src/SafetySystem.cpp \
+        src/StepperMotorShell.cpp \
         src/main.cpp \
         joystick/joystick.cc \
         src/gamepad.cpp \
@@ -31,23 +37,38 @@ SOURCES += \
         src/serialport.cpp \
         RS-232/rs232.c \
         src/servo.cpp \
-        src/lights.cpp
+        src/lights.cpp \
+        src/logutils.cpp \
+        src/SettingsWindow.cpp \
+        src/RTIMUHal.cpp \
 
 HEADERS += \
-        inc/gamepad.h \
+    inc/AHRS.h \
+        inc/Base/* \
+        inc/Base/SafetySystemBase.h \
+        inc/Base/StepperMotorShellBase.h \
+        inc/DistanceSensors.h \
+        inc/FileHandling.h \
+    inc/IMU.h \
+        inc/MPU9255.h \
+        inc/SafetySystem.h \
+        inc/StepperMotorShell.h \
         inc/common.h \
         inc/steppermotor.h \
         inc/serialport.h \
-        CarInterface/interface.h \
         inc/servo.h \
-        inc/lights.h
+        inc/lights.h \
+        inc/logutils.h \
+        inc/gamepad.h \
+        CarInterface/interface.h \
+        RS-232/rs232.h \
+        inc/SettingsWindow.h \
+        inc/RTIMUHal.h \
+
+FORMS += \
+        Forms/SettingsWindow.ui \
 
 target.path = /home/pi
 INSTALLS += target
 
 LIBS += -lwiringPi \
-
-INCLUDEPATH += \
-    /home/ekacmac/raspi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/arm-linux-gnueabihf/include/c++/4.8.3 \
-    /home/ekacmac/raspi/sysroot/usr/include \
-    $$PWD/inc \

@@ -1,48 +1,35 @@
 #pragma once
 
-#include "CarInterface/interface.h"
+#include <CarInterface/interface.h>
+#include <QDebug>
 
 #include <cstdint>
 #include <cstdlib>
 #include <cmath>
 
+#include <bits/stdc++.h>
+
+typedef uint32_t U32;
+typedef int32_t S32;
 typedef uint16_t U16;
 typedef int16_t S16;
 typedef uint8_t U8;
 typedef int8_t S8;
 
-const U8 GAMEPAD_REFRESH_TIME = 1; //Time in milliseconds
+enum ExitReason
+{
+    EXIT_BY_BUTTON = 0,
+    EXIT_BY_MISSING_GAMEPAD = 1,
+    EXIT_BY_FAILED_GPIO = 2,
+    EXIT_BY_MISSING_MODULE = 3,
+    EXIT_BY_MISSING_DISTANCE_SENSOR = 4
+};
 
-const U8 EXIT_BY_BUTTON = 1;
-const U8 EXIT_BY_MISSING_GAMEPAD = 2;
-const U8 EXIT_BY_FAILED_GPIO = 3;
-const U8 EXIT_BY_MISSING_MODULE = 4;
+const S8 LIGHTS_AND_SERVO_PORT_BASE[] = "ttyUSB0";
+const S8 LIGHTS_AND_SERVO_PORT_BACKUP[] = "ttyUSB1";
 
 const bool BUTTON_DOWN = true;
 const bool BUTTON_UP = false;
-
-const U8 NUMBER_OF_BUTTONS = 10;
-const U8 NUMBER_OF_AXIS = 7;
-const S16 MAX_AXIS_VALUE = 32767;
-const S16 MIN_AXIS_VALUE = -32767;
-
-enum ButtonID
-{
-    EXIT_BUTTON = 11,
-    X_BUTTON = 3,
-    RIGHT_BUMPER = 7,
-    LEFT_BUMPER = 6,
-};
-
-enum AxisID
-{
-    LEFT_X_AXIS = 0,
-    RIGHT_TRIGGER = 4,
-    LEFT_TRIGGER = 5,
-    ARROW_Y_AXIS = 7
-};
-
-const S8  LIGHTS_AND_SERVO_PORT [] = "ttyUSB0";
 
 enum StepperMotorCommand
 {
@@ -54,18 +41,47 @@ enum StepperMotorCommand
 
 enum StepperMotorDirection
 {
-    FORWARD = 0,
-    BACKWARD = 1
+    DIRECTION_FORWARD = 0,
+    DIRECTION_BACKWARD = 1,
 };
 
-const U16 MAX_SPEED = 2000;
-const U16 MIN_SPEED = 300;
+enum ButtonName
+{
+    EXIT_BUTTON = 0,
+    BRAKE_BUTTON = 1,
+    LEFT_BLINKER_BUTTON = 2,
+    RIGHT_BLINKER_BUTTON = 3
+};
 
-const U8 STEPPER_ENABLE_PIN = 27;
-const U8 STEPPER_STEP_PIN = 29;
-const U8 STEPPER_DIRECTION_PIN = 28;
+enum AxisName
+{
+    LEFT_X_AXIS = 0,
+    RIGHT_TRIGGER = 4,
+    LEFT_TRIGGER = 5,
+    ARROW_Y_AXIS = 7
+};
 
-const U8 TOTAL_WHEEL_ANGLE = 80;
+enum SensorAlignment
+{
+    SENSOR_FRONT = 0,
+    SENSOR_FRONT_LEFT = 1,
+    SENSOR_FRONT_RIGHT = 2,
+    SENSOR_REAR = 3,
+    SENSOR_REAR_LEFT = 4,
+    SENSOR_REAR_RIGHT = 5,
+    SENSOR_LEFT_SIDE = 6,
+    SENSOR_RIGHT_SIDE = 7
+};
 
-static const float AXIS_TO_SPEED_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(MAX_SPEED - MIN_SPEED);
-static const float AXIS_TO_DEEGRES_SCALE =  float( std::abs(MIN_AXIS_VALUE) + MAX_AXIS_VALUE + 1 ) / float(TOTAL_WHEEL_ANGLE);
+struct AllowedDirection
+{
+    bool forward;
+    bool backward;
+};
+
+enum ControlPiority
+{
+    PRIORITY_AUTOPILOT = 0,
+    PRIORITY_MANUAL = 1,
+    PRIORITY_SAFETYSYSTEM = 3
+};

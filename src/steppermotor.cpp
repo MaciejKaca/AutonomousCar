@@ -1,111 +1,164 @@
-#include "steppermotor.h"
-#include "common.h"
+#include <inc/steppermotor.h>
+#include <inc/common.h>
 
 #include <wiringPi.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <chrono>
 #include <thread>
 #include <future>
 #include <QDebug>
+#include <cmath>
 
 StepperMotor::StepperMotor()
 {
-    if(wiringPiSetup() < 0)
-    {
-        qCritical( "GPIO Failed");
-        exit(EXIT_BY_FAILED_GPIO);
-    }
+    qInfo("in StepperMotor, initializing constructor");
 
     pinMode(STEPPER_DIRECTION_PIN, OUTPUT);
     pinMode(STEPPER_ENABLE_PIN, OUTPUT);
     pinMode(STEPPER_STEP_PIN, OUTPUT);
 
     digitalWrite(STEPPER_DIRECTION_PIN, LOW);
-    digitalWrite(STEPPER_ENABLE_PIN, LOW);
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH); // !E
     digitalWrite(STEPPER_STEP_PIN, LOW);
 
-    threadActive = false;
+    speed = 0;
+    desiredSpeed = 0;
+    terminateThread = true;
+
+    stepperThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
 }
 
-void StepperMotor::validateSpeed(U16 &speed)
+StepperMotorBase::~StepperMotorBase(){}
+
+StepperMotor::~StepperMotor()
 {
-    if(speed > MAX_SPEED)
-        speed = MAX_SPEED;
-
-    if(speed < MIN_SPEED)
-        speed = MIN_SPEED;
-
-    delay = MIN_SPEED + (MAX_SPEED - speed);
+    qInfo() << "in StepperMotor::~StepperMotor, destructor called";
+    switchOff();
 }
 
-bool StepperMotor::makeStep(const StepperMotorDirection direction,  U16 speed)
+void StepperMotor::makeStep(const StepperMotorDirection _direction, const U16 _speed)
 {
-    validateSpeed(speed);
+    U16 delay = MAX_DELAY - _speed*((MAX_DELAY-MIN_DELAY)/(MAX_SPEED-MIN_SPEED));
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
 
-    if(direction == FORWARD)
+    if(_direction == DIRECTION_FORWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, HIGH);
     }
-    else if(direction == BACKWARD)
+    else if(_direction == DIRECTION_BACKWARD)
     {
         digitalWrite(STEPPER_DIRECTION_PIN, LOW);
     }
-
-    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 
     digitalWrite(STEPPER_STEP_PIN, HIGH);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
     digitalWrite(STEPPER_STEP_PIN, LOW);
     std::this_thread::sleep_for(std::chrono::microseconds(delay));
-
-    return true;
 }
 
 void StepperMotor::brake()
 {
-    checkAndStopThread();
-    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
+    qInfo("in StepperMotor::brake(): braking");
+
+    stopThread();
+    speed = 0;
+    desiredSpeed = 0;
+    digitalWrite(STEPPER_ENABLE_PIN, LOW);
 }
 
-void StepperMotor::swithOff()
+void StepperMotor::switchOff()
 {
-    checkAndStopThread();
-    digitalWrite(STEPPER_ENABLE_PIN, LOW);
+    qInfo("in StepperMotor::switchOff(): switchOff off stepper");
+
+    stopThread();
+    speed = 0;
+    desiredSpeed = 0;
+    digitalWrite(STEPPER_ENABLE_PIN, HIGH);
 }
 
 void StepperMotor::constantMovement()
 {
-    threadActive = true;
-
-    while(threadActive == true)
+    while(!terminateThread)
     {
+        acceleration();
         makeStep(direction, speed);
     }
 }
 
-void StepperMotor::checkAndStopThread()
-{
-    if(threadActive == true)
-    {
-        threadActive = false;
-        stepperThread.join();
-    }
-}
 
 void StepperMotor::move(const StepperMotorDirection _direction,  const U16 _speed)
 {
+    desiredSpeed = _speed;
     direction = _direction;
-    speed = _speed;
 
-    if( speed > MIN_SPEED)
+    launchThread();
+}
+
+const double& StepperMotor::getSpeed()
+{
+    return speed;
+}
+
+const StepperMotorDirection &StepperMotor::getDirection()
+{
+    return direction;
+}
+
+void StepperMotor::acceleration()
+{
+    if(speed == 0)
     {
-        if(threadActive == false)
+        speed++;
+    }
+    if(speed < desiredSpeed)
+    {
+        if(speed < ACCEL_FUNC_SWITCH_THRES)
         {
-            stepperThread = std::thread(&StepperMotor::constantMovement, this);
+            speed = (((speed/ACCELERATION_LINEAR)+ACCEL_STEP_RESOLUTION)*ACCELERATION_LINEAR);
         }
+        else
+        {
+            speed = (log(exp(speed/ACCELERATION_LOG)+ACCEL_STEP_RESOLUTION)*ACCELERATION_LOG);
+        }
+
+        if(speed > desiredSpeed)
+        {
+            speed = desiredSpeed;
+        }
+    }
+    else if(speed > desiredSpeed)
+    {
+        speed = floor(((speed/ACCELERATION_LINEAR)-ACCEL_STEP_RESOLUTION)*ACCELERATION_LINEAR);
+    }
+}
+
+bool StepperMotor::isThreadRunning()
+{
+    auto status = stepperThread.wait_for(std::chrono::microseconds(0));
+    if (status == std::future_status::ready)
+    {
+        return false;
     }
     else
     {
-        swithOff();
+        return  true;
     }
+}
+
+void StepperMotor::launchThread()
+{
+    if(!isThreadRunning())
+    {
+        qInfo("in StepperMotor::launchThread(): launching thread for constantMovement");
+        stepperThread.get();
+        terminateThread = false;
+        stepperThread = std::async(std::launch::async, &StepperMotor::constantMovement, this);
+    }
+}
+
+void StepperMotor::stopThread()
+{
+    qInfo("in StepperMotor::stopThread(): stopping thread");
+    terminateThread = true;
 }
