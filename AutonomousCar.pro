@@ -27,7 +27,6 @@ SOURCES += \
         src/DistanceSensors.cpp \
         src/FileHandling.cpp \
     src/IMU.cpp \
-        src/MPU9255.cpp \
         src/SafetySystem.cpp \
         src/StepperMotorShell.cpp \
         src/main.cpp \
@@ -40,7 +39,6 @@ SOURCES += \
         src/lights.cpp \
         src/logutils.cpp \
         src/SettingsWindow.cpp \
-        src/RTIMUHal.cpp \
 
 HEADERS += \
     inc/AHRS.h \
@@ -50,7 +48,6 @@ HEADERS += \
         inc/DistanceSensors.h \
         inc/FileHandling.h \
     inc/IMU.h \
-        inc/MPU9255.h \
         inc/SafetySystem.h \
         inc/StepperMotorShell.h \
         inc/common.h \
@@ -63,7 +60,6 @@ HEADERS += \
         CarInterface/interface.h \
         RS-232/rs232.h \
         inc/SettingsWindow.h \
-        inc/RTIMUHal.h \
 
 FORMS += \
         Forms/SettingsWindow.ui \
