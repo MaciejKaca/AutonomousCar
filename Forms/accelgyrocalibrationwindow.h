@@ -15,6 +15,9 @@ public:
     explicit AccelGyroCalibrationWindow(QWidget *parent = nullptr);
     ~AccelGyroCalibrationWindow();
 
+private slots:
+    void on_buttonBox_accepted();
+
 private:
     Ui::AccelGyroCalibrationWindow *ui;
 };
