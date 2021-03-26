@@ -49,14 +49,18 @@ void SerialPort::send(U8 * buffer,const S16 &size)
     std::lock_guard<std::mutex> lock(send_mutex);
     if(!(RS232_SendBuf(CPORT_NR, buffer, size) > 0))
     {
-        qCritical("in SerialPort::send(): failed");
+        qCritical("in SerialPort::send(): failed on port=%d", CPORT_NR);
         this->open_comport();
         RS232_SendBuf(CPORT_NR, buffer, size);
     }
 }
 
-void SerialPort::read(U8 * buffer,const S16 &size)
+int SerialPort::read(U8 * buffer,const S16 &size)
 {
-    qInfo("in SerialPort::read()");
-    RS232_PollComport(CPORT_NR, buffer, size);
+    S16 noIfBytes = RS232_PollComport(CPORT_NR, buffer, size);
+    if(noIfBytes < 0)
+    {
+        qWarning("in SerialPort::read(): Failed to read, ERROR= %d", noIfBytes);
+    }
+    return noIfBytes;
 }

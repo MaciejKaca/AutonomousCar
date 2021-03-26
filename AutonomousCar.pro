@@ -24,9 +24,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+    Forms/accelgyrocalibrationwindow.cpp \
         src/DistanceSensors.cpp \
         src/FileHandling.cpp \
     src/IMU.cpp \
+        src/IMU.cpp \
         src/SafetySystem.cpp \
         src/StepperMotorShell.cpp \
         src/main.cpp \
@@ -41,6 +43,7 @@ SOURCES += \
         src/SettingsWindow.cpp \
 
 HEADERS += \
+    Forms/accelgyrocalibrationwindow.h \
     inc/AHRS.h \
         inc/Base/* \
         inc/Base/SafetySystemBase.h \
@@ -48,6 +51,7 @@ HEADERS += \
         inc/DistanceSensors.h \
         inc/FileHandling.h \
     inc/IMU.h \
+        inc/IMU.h \
         inc/SafetySystem.h \
         inc/StepperMotorShell.h \
         inc/common.h \
@@ -63,6 +67,7 @@ HEADERS += \
 
 FORMS += \
         Forms/SettingsWindow.ui \
+        Forms/accelgyrocalibrationwindow.ui
 
 target.path = /home/pi
 INSTALLS += target

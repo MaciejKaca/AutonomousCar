@@ -9,7 +9,7 @@ public:
     SerialPort();
     ~SerialPort();
     void send(U8 *buffer,const S16 &size) override;
-    void read(U8 *buffer,const S16 &size) override;
+    int read(U8 *buffer,const S16 &size) override;
 
 private:
     bool serialStatus;
