@@ -10,6 +10,8 @@
 #include <inc/SafetySystem.h>
 #include <inc/StepperMotorShell.h>
 #include <inc/SettingsWindow.h>
+#include <inc/FileHandling.h>
+#include <inc/IMU.h>
 
 int main(int argc, char *argv[])
 {
@@ -23,28 +25,33 @@ int main(int argc, char *argv[])
     wiringPiSetup();
 
     SerialPort* lightsAndServoSerial;
+    SerialPort* imuSerial;
     Servo* servo;
     Lights* lights;
     Gamepad* gamepad;
     StepperMotorShell* stepperMotorShell;
     DistanceSensors *distanceSensors;
     SafetySystem *safetySystems;
+    FileHandling *fileHandling;
 
     try
     {
-        lightsAndServoSerial = new SerialPort();
+        fileHandling = new FileHandling();
+        lightsAndServoSerial = new SerialPort(LIGHTS_AND_SERVO_PORT);
+        imuSerial = new SerialPort(IMU_PORT);
         distanceSensors = new DistanceSensors();
         lights = new Lights(lightsAndServoSerial);
         stepperMotorShell =  new StepperMotorShell(lights);
         servo = new Servo(lightsAndServoSerial, stepperMotorShell);
         safetySystems = new SafetySystem(servo, stepperMotorShell, distanceSensors);
-        gamepad = new Gamepad(stepperMotorShell, servo, lights);
+        gamepad = new Gamepad(stepperMotorShell, servo, lights, fileHandling);
     }
     catch(ExitReason excp)
     {
         switch(excp)
         {
         case EXIT_BY_MISSING_GAMEPAD:
+            delete imuSerial;
             delete distanceSensors;
             delete lights;
             delete servo;
@@ -70,6 +77,7 @@ int main(int argc, char *argv[])
         switch(excp)
         {
         default:
+            delete imuSerial;
             delete safetySystems;
             delete distanceSensors;
             delete lights;
@@ -82,6 +90,7 @@ int main(int argc, char *argv[])
         return excp;
     }
 
+    delete imuSerial;
     delete safetySystems;
     delete lights;
     delete servo;

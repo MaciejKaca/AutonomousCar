@@ -11,7 +11,7 @@
 #include <inc/steppermotor.h>
 #include <RS-232/rs232.h>
 
-Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights):
+Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights, FileHandling *_settings):
       AXIS_TO_SPEED_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
                           static_cast<float>(_stepperMotor->MAX_SPEED - StepperMotor::MIN_SPEED)),
       AXIS_TO_ANGLE_SCALE(static_cast<float>(std::abs(JoystickEvent::MIN_AXES_VALUE)+JoystickEvent::MAX_AXES_VALUE+1)/
@@ -33,11 +33,12 @@ Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_light
     stepperMotor = _stepperMotor;
     servo = _servo;
     lights = _lights;
+    settings = _settings;
 
-    buttonMapping[settings.getExitButtonId()] = EXIT_BUTTON;
-    buttonMapping[settings.getBrakeButtonId()] = BRAKE_BUTTON;
-    buttonMapping[settings.getLeftBlinkerButtonId()] = LEFT_BLINKER_BUTTON;
-    buttonMapping[settings.getRightBlinkerButtonId()] = RIGHT_BLINKER_BUTTON;
+    buttonMapping[settings->getExitButtonId()] = EXIT_BUTTON;
+    buttonMapping[settings->getBrakeButtonId()] = BRAKE_BUTTON;
+    buttonMapping[settings->getLeftBlinkerButtonId()] = LEFT_BLINKER_BUTTON;
+    buttonMapping[settings->getRightBlinkerButtonId()] = RIGHT_BLINKER_BUTTON;
 
     buttonState[BRAKE_BUTTON] = BUTTON_UP;
     buttonState[EXIT_BUTTON] = BUTTON_UP;

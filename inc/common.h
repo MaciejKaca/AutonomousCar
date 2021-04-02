@@ -25,8 +25,8 @@ enum ExitReason
     EXIT_BY_MISSING_DISTANCE_SENSOR = 4
 };
 
-const S8 LIGHTS_AND_SERVO_PORT_BASE[] = "ttyUSB0";
-const S8 LIGHTS_AND_SERVO_PORT_BACKUP[] = "ttyUSB1";
+const QString LIGHTS_AND_SERVO_PORT = "ttyUSB0";
+const QString IMU_PORT = "ttyUSB1";
 
 const bool BUTTON_DOWN = true;
 const bool BUTTON_UP = false;

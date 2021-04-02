@@ -17,7 +17,7 @@ class Gamepad
     friend class GamepadTest;
 
     public:
-        Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights);
+        Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights, FileHandling *_settings);
         void startThread();
         void stopThread();
         void waitForExitButton();
@@ -49,7 +49,7 @@ class Gamepad
         StepperMotorShell *stepperMotor;
         Servo *servo;
         Lights *lights;
-        FileHandling settings;
+        FileHandling *settings;
 
         bool isReadGamepadInputThreadActive;
         bool isHandleButtonInputsThreadActive;

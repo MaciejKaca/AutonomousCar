@@ -1,15 +1,17 @@
-#ifndef IMU_H
-#define IMU_H
+#pragma once
 
 #include "common.h"
 #include "serialport.h"
+#include "FileHandling.h"
 
 class IMU
 {
 public:
-    IMU(SerialPort* _serialPort);
-    void calibrate();
+    IMU(SerialPort* _serialPort, FileHandling* fileSettings);
+    ~IMU();
+    void startCalibration();
     void startMeasurements();
+    void stopMeasurements();
 
     const S16& getPitch();
     const S16& getRoll();
@@ -23,14 +25,24 @@ private:
     const float magneticDelication = 4.5;
 
     SerialPort* const serialPort;
+    FileHandling* const fileSettings;
 
-    MPU9250Setting readSettings();
-    QVector3D accelrBias();
-    QVector3D gyroBias();
-    QVector3D magBias();
-    QVector3D magScale();
+    //MPU9250Setting readSettings();
+    void readCalibration();
+    void saveCalibration();
+    QVector3D* accelBias;
+    QVector3D* gyroBias;
+    QVector3D* magBias;
+    QVector3D* magScale;
+
+    void receiveMeasurements();
+    void calibrate();
 
     const U16 REFRESH_TIME = 1; //milliseconds
-};
 
-#endif // IMU_H
+    std::future<void> imuThread;
+    std::mutex savingMeasurements_mutex;
+
+    bool calibrationWasPerformed;
+    bool collectMeasurements;
+};
