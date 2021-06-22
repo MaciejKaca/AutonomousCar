@@ -33,12 +33,14 @@ int main(int argc, char *argv[])
     DistanceSensors *distanceSensors;
     SafetySystem *safetySystems;
     FileHandling *fileHandling;
+    IMU *imu;
 
     try
     {
         fileHandling = new FileHandling();
         lightsAndServoSerial = new SerialPort(LIGHTS_AND_SERVO_PORT);
         imuSerial = new SerialPort(IMU_PORT);
+        imu = new IMU(imuSerial, fileHandling);
         distanceSensors = new DistanceSensors();
         lights = new Lights(lightsAndServoSerial);
         stepperMotorShell =  new StepperMotorShell(lights);
@@ -67,6 +69,7 @@ int main(int argc, char *argv[])
 
     try
     {
+        imu->startCalibration();
         stepperMotorShell->setSafetySystem(safetySystems);
         gamepad->startThread();
         gamepad->waitForExitButton();

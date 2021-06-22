@@ -45,6 +45,7 @@ HEADERS += \
         Forms/calibrationwindow.h \
         inc/AHRS.h \
         inc/Base/* \
+    inc/Base/FileHandlingBase.h \
         inc/Base/SafetySystemBase.h \
         inc/Base/StepperMotorShellBase.h \
         inc/DistanceSensors.h \

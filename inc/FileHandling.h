@@ -1,47 +1,48 @@
 #pragma once
 
 #include "common.h"
+#include "Base/FileHandlingBase.h"
 #include <QFile>
 
-class FileHandling
+class FileHandling : FileHandlingBase
 {
 public:
     FileHandling();
     ~FileHandling();
 
-    U8 getBrakeButtonId();
-    U8 getLeftBlinkerButtonId();
-    U8 getRightBlinkerButtonId();
-    U8 getExitButtonId();
-    float getAccelBiasX();
-    float getAccelBiasY();
-    float getAccelBiasZ();
-    float getGyroBiasX();
-    float getGyroBiasY();
-    float getGyroBiasZ();
-    float getMagBiasX();
-    float getMagBiasY();
-    float getMagBiasZ();
-    float getMagScaleX();
-    float getMagScaleY();
-    float getMagScaleZ();
+    U8 getBrakeButtonId() override;
+    U8 getLeftBlinkerButtonId() override;
+    U8 getRightBlinkerButtonId() override;
+    U8 getExitButtonId() override;
+    float getAccelBiasX() override;
+    float getAccelBiasY() override;
+    float getAccelBiasZ() override;
+    float getGyroBiasX() override;
+    float getGyroBiasY() override;
+    float getGyroBiasZ() override;
+    float getMagBiasX() override;
+    float getMagBiasY() override;
+    float getMagBiasZ() override;
+    float getMagScaleX() override;
+    float getMagScaleY() override;
+    float getMagScaleZ() override;
 
-    void setBrakeButtonId(const S32& value);
-    void setLeftBlinkerButtonId(const S32& value);
-    void setRightBlinkerButtonId(const S32& value);
-    void setExitButtonId(const S32& value);
-    void setAccelBiasX(const float& value);
-    void setAccelBiasY(const float& value);
-    void setAccelBiasZ(const float& value);
-    void setGyroBiasX(const float& value);
-    void setGyroBiasY(const float& value);
-    void setGyroBiasZ(const float& value);
-    void setMagBiasX(const float& value);
-    void setMagBiasY(const float& value);
-    void setMagBiasZ(const float& value);
-    void setMagScaleX(const float& value);
-    void setMagScaleY(const float& value);
-    void setMagScaleZ(const float& value);
+    void setBrakeButtonId(const S32& value) override;
+    void setLeftBlinkerButtonId(const S32& value) override;
+    void setRightBlinkerButtonId(const S32& value) override;
+    void setExitButtonId(const S32& value) override;
+    void setAccelBiasX(const float& value) override;
+    void setAccelBiasY(const float& value) override;
+    void setAccelBiasZ(const float& value) override;
+    void setGyroBiasX(const float& value) override;
+    void setGyroBiasY(const float& value) override;
+    void setGyroBiasZ(const float& value) override;
+    void setMagBiasX(const float& value) override;
+    void setMagBiasY(const float& value) override;
+    void setMagBiasZ(const float& value) override;
+    void setMagScaleX(const float& value) override;
+    void setMagScaleY(const float& value) override;
+    void setMagScaleZ(const float& value) override;
 
 private:
     const QString GAMEPAD_SETTINGS_FILE_NAME = "gamepadSettings.txt";

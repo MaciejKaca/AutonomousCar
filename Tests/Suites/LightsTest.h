@@ -47,8 +47,6 @@ TEST(LightsTest, set)
     lights->setReverseLight(expectedReverseLightCommand);
     EXPECT_EQ(lights->getReverseLightStatus(), expectedReverseLightCommand);
 
-    bool serialState = false;
-    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
     delete serialPort;
 }
@@ -81,8 +79,6 @@ TEST(LightsTest, defaultBrakeLightOff)
     lights->setBrakeLights(BRAKE_LIGHT_OFF);
     EXPECT_EQ(lights->getBrakeLightsStatus(), expectedBrakeLightsCommand);
 
-    bool serialState = false;
-    EXPECT_CALL(*serialPort, isSerialOpen).WillOnce(ReturnRef(serialState));
     delete lights;
     delete serialPort;
 }

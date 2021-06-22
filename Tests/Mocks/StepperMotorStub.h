@@ -10,13 +10,12 @@ public:
     void move(const StepperMotorDirection _direction, const U16 _speed) override;
     void brake() override;
     void switchOff() override;
-    bool makeStep(const StepperMotorDirection _direction, const U16 _speed) override;
-    const bool &isThreadActive() override;
-    const U16 &getSpeed() override;
+    void makeStep(const StepperMotorDirection _direction, const U16 _speed) override;
+    const double &getSpeed() override;
     const StepperMotorDirection &getDirection() override;
 
 private:
-    U16 speed;
+    double speed;
     StepperMotorDirection direction;
 };
 
@@ -42,15 +41,11 @@ void StepperMotorStub::switchOff()
     speed = 0;
 }
 
-bool StepperMotorStub::makeStep(const StepperMotorDirection _direction, const U16 _speed)
+void StepperMotorStub::makeStep(const StepperMotorDirection _direction, const U16 _speed)
 {
 }
 
-const bool &StepperMotorStub::isThreadActive()
-{
-}
-
-const U16 &StepperMotorStub::getSpeed()
+const double &StepperMotorStub::getSpeed()
 {
     return speed;
 }

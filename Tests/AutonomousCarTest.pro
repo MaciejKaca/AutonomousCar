@@ -6,7 +6,9 @@ CONFIG -= app_bundle
 
 HEADERS += \
         $$PWD/Mocks/** \
-        $$PWD/Suites/**
+        $$PWD/Suites/** \
+    Mocks/StepperMotorShellMock.h
+
 SOURCES += \
         main.cpp \
         $$PWD/../joystick/joystick.cc \
@@ -16,7 +18,10 @@ SOURCES += \
         $$PWD/../src/servo.cpp \
         $$PWD/../src/serialport.cpp \
         $$PWD/../src/steppermotor.cpp \
-        $$PWD/../src/logutils.cpp
+        $$PWD/../src/logutils.cpp \
+        $$PWD/../src/FileHandling.cpp \
+        $$PWD/../src/StepperMotorShell.cpp \
+        $$PWD/../src/SafetySystem.cpp \
 
 LIBS += -lwiringPi \
 

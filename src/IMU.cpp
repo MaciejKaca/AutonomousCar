@@ -28,9 +28,9 @@ void IMU::calibrate()
 {
     calibrationWasPerformed = true;
 
-    calibrationWindow window;
-    window.changeCalibrationType(calibrationWindow::CalibrationType::ACCEL_GYRO_CALIBRATION);
-    window.show();
+//    calibrationWindow window;
+//    window.changeCalibrationType(calibrationWindow::CalibrationType::ACCEL_GYRO_CALIBRATION);
+//    window.show();
 
     CalibrationReq calibrationReq;
     calibrationReq.mpuSettings = mpuSettings;
@@ -46,13 +46,14 @@ void IMU::calibrate()
 
     if(calibrationCfm.isValid)
     {
-        window.changeCalibrationType(calibrationWindow::CalibrationType::MAG_CALIBRATION);
-        window.show();
+        qCritical("OK MAG CAL");
+//        window.changeCalibrationType(calibrationWindow::CalibrationType::MAG_CALIBRATION);
+//        window.show();
     }
     else
     {
         qCritical("in IMU::calibrate, failed to calibrate Accelerometer and Gyrometer");
-        return;
+        //return;
     }
 
     while(serialPort->read((U8*)&calibrationCfm, sizeof(calibrationCfm)))
@@ -75,8 +76,9 @@ void IMU::calibrate()
         magScale->setY(calibrationCfm.magScale.y);
         magScale->setZ(calibrationCfm.magScale.z);
         saveCalibration();
-        window.changeCalibrationType(calibrationWindow::CalibrationType::CALIBRATION_DONE);
-        window.show();
+        qCritical("DONE");
+//        window.changeCalibrationType(calibrationWindow::CalibrationType::CALIBRATION_DONE);
+//        window.show();
     }
     else
     {

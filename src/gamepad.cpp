@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include <inc/steppermotor.h>
+#include <inc/StepperMotorShell.h>
 #include <RS-232/rs232.h>
 
 Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_lights, FileHandling *_settings):
@@ -20,6 +20,8 @@ Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_light
 {
     qInfo("in Gamepad, initializing constructor");
     joystick = new Joystick();
+
+#ifdef TESTS
     if (!joystick->isFound())
     {
         qCritical("in Gamepad::Gamepad, joystick not found");
@@ -29,6 +31,7 @@ Gamepad::Gamepad(StepperMotorShell *_stepperMotor, Servo *_servo, Lights *_light
     {
         qInfo("in Gamepad::Gamepad, joystick found");
     }
+#endif
 
     stepperMotor = _stepperMotor;
     servo = _servo;

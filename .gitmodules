@@ -13,3 +13,6 @@
 [submodule "MPU9250"]
 	path = MPU9250
 	url = https://github.com/hideakitai/MPU9250.git
+[submodule "WiringPi"]
+	path = WiringPi
+	url = https://github.com/WiringPi/WiringPi.git

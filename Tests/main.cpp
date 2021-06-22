@@ -1,11 +1,13 @@
-#include <Suites/LightsTest.h>
-#include <Suites/ServoTest.h>
-#include <Suites/StepperMotorTest.h>
-#include <Suites/GamepadTest.h>
+//#include <Suites/LightsTest.h>
+//#include <Suites/ServoTest.h>
+//#include <Suites/StepperMotorTest.h>
+//#include <Suites/GamepadTest.h>
 
 #include <gtest/gtest.h>
 #include <inc/logutils.h>
 #include <wiringPi.h>
+
+#define TESTING
 
 int main(int argc, char *argv[])
 {
